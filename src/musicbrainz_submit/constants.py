@@ -1,0 +1,4 @@
+MUSICBRAINZ_PORT: int = 8001
+SPOTIFY_PORT: int = 8002
+
+USER_AGENT: str = "collector/1.0"

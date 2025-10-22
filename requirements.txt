@@ -1,0 +1,16 @@
+PyJWT
+dotenv
+pillow
+bandcamp-lib
+spotipy
+deezer-python
+tidalapi
+beautifulsoup4
+requests
+apple-music-python
+ytmusicapi
+python3-discogs-client
+musicbrainzngs
+fuzzywuzzy[speedup]
+transliterate
+tqdm

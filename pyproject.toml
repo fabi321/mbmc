@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "musicbrainz-submit"
+version = "0.0.1"
+description = "TODO: Add description"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [{ name = "Fabian Wunsch" }]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Operating System :: OS Independent",
+    "Typing :: Typed",
+]
+dependencies = [
+    "PyJWT",
+    "dotenv",
+    "pillow",
+    "bandcamp-lib",
+    "spotipy",
+    "deezer-python",
+    "tidalapi",
+    "beautifulsoup4",
+    "requests",
+    "apple-music-python",
+    "ytmusicapi",
+    "python3-discogs-client",
+    "musicbrainzngs",
+    "fuzzywuzzy[speedup]",
+    "transliterate",
+    "tqdm",
+]
+
+[project.optional-dependencies]
+dev = ["black", "isort", "pip-tools", "mypy", "flake8", "coverage", "pylint"]
+
+[project.urls]
+homepage = "https://github.com/stormworks-utils/tumfl"
+repository = "https://github.com/stormworks-utils/tumfl"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.scripts]
+musicbrainz_submit = "musicbrainz_submit.__main__:main"
