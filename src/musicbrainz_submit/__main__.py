@@ -71,6 +71,11 @@ def main() -> int:
                 results = to_mb_release(gathered_responses, app)
                 if results:
                     add_release(results)
+                else:
+                    for response in gathered_responses:
+                        if not isinstance(response.provider, MusicBrainzProvider):
+                            ignored_providers.remove(response.provider)
+                    missing[album] = ignored_providers
 
     input("Press Enter to continue...")
     # when done with GUI:

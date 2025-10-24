@@ -39,10 +39,6 @@ def get_providers(mb_id: str, queue: Queue[str | tuple[str, int]]) -> list[Provi
         relevant_urls.append(url["target"])
     relevant_urls.append(f"https://musicbrainz.org/artist/{mb_id}")
     pairings: list[tuple[type[Provider], str, Queue[str | tuple[str, int]]]] = []
-    if "https://music.youtube.com/channel/UCVXoLhEMTe82iRtaXP70Rsg" in relevant_urls:
-        relevant_urls.remove(
-            "https://music.youtube.com/channel/UCVXoLhEMTe82iRtaXP70Rsg"
-        )
 
     for link in relevant_urls:
         for provider_cls in PROVIDERS:
@@ -386,4 +382,5 @@ def to_mb_release(albums: list[Album], app: CollectorApp) -> Optional[dict[str, 
     edit_note += "\n Added via mbmc: https://github.com/fabi321/mbmc"
     result["edit_note"] = edit_note
     result["status"] = "official"
+    result["redirect_uri"] = "https://harmony.pulsewidth.org.uk/release/actions"
     return result

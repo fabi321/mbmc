@@ -22,6 +22,11 @@ class Progress(Thread):
         sys.stdout.write(f"\033[F\033[K{line}\n")
         sys.stdout.flush()
 
+    def full_update(self):
+        self.update_status_line(
+            ", ".join(name for name, (total, current) in self.per_name.items() if total > current)
+        )
+
     def run(self) -> None:
         while True:
             item = self.queue.get()
@@ -31,18 +36,13 @@ class Progress(Thread):
             if isinstance(item, str):
                 self.per_name[item][1] += 1
                 self.bar.update(1)
-                self.update_status_line(
-                    ", ".join(
-                        name
-                        for name, (total, current) in self.per_name.items()
-                        if total > current
-                    )
-                )
+                self.full_update()
             else:
                 name, total = item
                 previous, previous_count = self.per_name.get(name, [0, 0])
                 self.per_name[name] = [total + previous, previous_count]
                 self.bar.total = sum(i[0] for i in self.per_name.values())
                 self.bar.refresh()
+                self.full_update()
             self.queue.task_done()
         self.bar.close()

@@ -15,7 +15,7 @@ from musicbrainz_submit.providers.provider import Provider, Album, Track, Artist
 @cache
 def get_api_key() -> str:
     initial: str = requests.get("https://music.apple.com/us/search?term=beatles").text
-    soup = BeautifulSoup(initial, "lxml")
+    soup = BeautifulSoup(initial, "html.parser")
     results = soup.find_all("script", attrs={"type": "module", "crossorigin": True})
     assert len(results) == 1
     script_url = results[0]["src"]
