@@ -1,4 +1,5 @@
 import sys
+from argparse import ArgumentParser
 from queue import Queue
 
 import dotenv
@@ -17,12 +18,20 @@ from musicbrainz_submit.providers.provider import Album
 
 
 def main() -> int:
+    parser = ArgumentParser(
+        description="Submit MusiocBrainz releases from various providers by artist."
+    )
+    parser.add_argument("mbid", help="MusicBrainz Artist ID or URL", type=str)
+    parser.add_argument(
+        "--no-harmony", "-n", action="store_true", help="Disable Harmony integration"
+    )
+    args = parser.parse_args()
     dotenv.load_dotenv()
     app = CollectorApp()
 
     start_server()
 
-    MB_ID: str = sys.argv[1].split("/")[-1]
+    MB_ID: str = args.mbid.split("/")[-1]
 
     queue: Queue[str | tuple[str, int] | None] = Queue()
     progress = Progress(queue)
@@ -66,11 +75,11 @@ def main() -> int:
                 for album in gathered_responses
             ):
                 mb_id, current_actions = merge_with_musicbrainz(gathered_responses)
-                edit_release(mb_id, current_actions)
+                edit_release(mb_id, current_actions, not args.no_harmony)
             else:
                 results = to_mb_release(gathered_responses, app)
                 if results:
-                    add_release(results)
+                    add_release(results, not args.no_harmony)
                 else:
                     for response in gathered_responses:
                         if not isinstance(response.provider, MusicBrainzProvider):

@@ -1,4 +1,3 @@
-PyJWT
 dotenv
 pillow
 bandcamp-lib

@@ -5,7 +5,10 @@ from typing import List
 import tidalapi
 
 from musicbrainz_submit.music_brainz import normalize_url
-from musicbrainz_submit.providers._mb_link_types import ARTIST_STREAMING, RELEASE_STREAMING
+from musicbrainz_submit.providers._mb_link_types import (
+    ARTIST_STREAMING,
+    RELEASE_STREAMING,
+)
 from musicbrainz_submit.providers.provider import Provider, Album, Track, ArtistFormat
 
 SESSION_FILE: Path = Path(__file__).parent.parent / ".sessions" / "tidal-session.txt"

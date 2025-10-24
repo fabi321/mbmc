@@ -4,7 +4,12 @@ from queue import Queue
 from typing import Optional
 
 from musicbrainz_submit.gui import CollectorApp
-from musicbrainz_submit.music_brainz import get_artist, get_releases, find_url, normalize_url
+from musicbrainz_submit.music_brainz import (
+    get_artist,
+    get_releases,
+    find_url,
+    normalize_url,
+)
 from musicbrainz_submit.prefetch import prefetch_provider
 from musicbrainz_submit.providers.apple_music import AppleMusicProvider
 from musicbrainz_submit.providers.bandcamp import BandcampProvider
@@ -12,7 +17,12 @@ from musicbrainz_submit.providers.deezer import DeezerProvider
 from musicbrainz_submit.providers.discogs import DiscogsProvider
 from musicbrainz_submit.providers.music_brainz_provider import MusicBrainzProvider
 from musicbrainz_submit.providers.provider import Provider, Album, ArtistFormat, Track
-from musicbrainz_submit.providers.question import pick_reduction_option, ask_question, Option, PREVIOUS_MAPPINGS
+from musicbrainz_submit.providers.question import (
+    pick_reduction_option,
+    ask_question,
+    Option,
+    PREVIOUS_MAPPINGS,
+)
 from musicbrainz_submit.providers.spotify import SpotifyProvider
 from musicbrainz_submit.providers.tidal import TidalProvider
 from musicbrainz_submit.providers.vk_music import VkMusicProvider
@@ -382,5 +392,4 @@ def to_mb_release(albums: list[Album], app: CollectorApp) -> Optional[dict[str, 
     edit_note += "\n Added via mbmc: https://github.com/fabi321/mbmc"
     result["edit_note"] = edit_note
     result["status"] = "official"
-    result["redirect_uri"] = "https://harmony.pulsewidth.org.uk/release/actions"
     return result

@@ -37,7 +37,14 @@ class BandcampProvider(Provider):
             else:
                 album = bc.fetch_track_sync(album_entry.band_id, album_entry.id)
             artist_name = [
-                (name.strip(), normalize_url(artist.url) if name.strip().lower() in artist.name.lower() else "unknown")
+                (
+                    name.strip(),
+                    (
+                        normalize_url(artist.url)
+                        if name.strip().lower() in artist.name.lower()
+                        else "unknown"
+                    ),
+                )
                 for name in (album_entry.artist_name or artist.name).split(",")
             ]
             tracks = [

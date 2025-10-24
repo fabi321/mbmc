@@ -24,7 +24,11 @@ class Progress(Thread):
 
     def full_update(self):
         self.update_status_line(
-            ", ".join(name for name, (total, current) in self.per_name.items() if total > current)
+            ", ".join(
+                name
+                for name, (total, current) in self.per_name.items()
+                if total > current
+            )
         )
 
     def run(self) -> None:

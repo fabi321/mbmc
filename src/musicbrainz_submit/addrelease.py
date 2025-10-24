@@ -50,28 +50,34 @@ def start_server():
     thread.start()
 
 
-def resolve_urls(urls: list[tuple[str, str]]) -> list[tuple[str, str]]:
+def resolve_urls(urls: list[tuple[str, str]], harmony: bool) -> list[tuple[str, str]]:
     resolved: list[tuple[str, str]] = []
     counter: int = 0
     for url, type_ in urls:
         resolved.append((f"urls.{counter}.url", url))
         resolved.append((f"urls.{counter}.link_type", type_))
         counter += 1
+    if harmony:
+        resolved.append(
+            ("redirect_uri", "https://harmony.pulsewidth.org.uk/release/actions")
+        )
     return resolved
 
 
-def edit_release(mb_id: str, urls: list[tuple[str, str]]):
-    ACTIONS[mb_id] = (f"release/{mb_id}/edit", resolve_urls(urls))
+def edit_release(mb_id: str, urls: list[tuple[str, str]], harmony: bool):
+    ACTIONS[mb_id] = (f"release/{mb_id}/edit", resolve_urls(urls, harmony))
     open(f"http://localhost:{MUSICBRAINZ_PORT}/{mb_id}")
 
 
-def edit_artist(mb_id: str, urls: list[tuple[str, str]]):
-    ACTIONS[mb_id] = (f"artist/{mb_id}/edit", resolve_urls(urls))
+def edit_artist(mb_id: str, urls: list[tuple[str, str]], harmony: bool):
+    ACTIONS[mb_id] = (f"artist/{mb_id}/edit", resolve_urls(urls, harmony))
     open(f"http://localhost:{MUSICBRAINZ_PORT}/{mb_id}")
 
 
-def add_release(form_data: dict[str, str]):
+def add_release(form_data: dict[str, str], harmony: bool):
     name: str = str(uuid.uuid4())
+    if harmony:
+        form_data["redirect_uri"] = "https://harmony.pulsewidth.org.uk/release/actions"
     ACTIONS[name] = ("release/add", list(form_data.items()))
     open(f"http://localhost:{MUSICBRAINZ_PORT}/{name}")
 

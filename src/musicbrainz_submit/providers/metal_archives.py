@@ -4,7 +4,10 @@ import requests
 from bs4 import BeautifulSoup
 
 from musicbrainz_submit.music_brainz import normalize_url
-from musicbrainz_submit.providers._mb_link_types import ARTIST_OTHER_DATABASES, RELEASE_OTHER_DATABASES
+from musicbrainz_submit.providers._mb_link_types import (
+    ARTIST_OTHER_DATABASES,
+    RELEASE_OTHER_DATABASES,
+)
 from musicbrainz_submit.providers.provider import Provider, Album, Track, ArtistFormat
 
 
