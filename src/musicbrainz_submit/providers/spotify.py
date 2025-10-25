@@ -1,8 +1,10 @@
 from functools import cache
+from pathlib import Path
 from typing import List
 
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
+from spotipy.cache_handler import CacheFileHandler
 
 from musicbrainz_submit.music_brainz import normalize_url
 from musicbrainz_submit.providers._mb_link_types import (
@@ -10,6 +12,9 @@ from musicbrainz_submit.providers._mb_link_types import (
     RELEASE_FREE_STREAMING,
 )
 from musicbrainz_submit.providers.provider import Provider, Album, Track, ArtistFormat
+from musicbrainz_submit.util import CONFIG_DIR
+
+SESSION_FILE: Path = CONFIG_DIR / "spotify-session.txt"
 
 
 class SpotifyProvider(Provider):
@@ -17,7 +22,8 @@ class SpotifyProvider(Provider):
         super().__init__("Spotify", query)
         self.spotify_url: str = normalize_url(spotify_url)
         self.artist_id = self.spotify_url.split("/")[-1]
-        auth_manager = SpotifyClientCredentials()
+        cache_handler = CacheFileHandler(cache_path=str(SESSION_FILE))
+        auth_manager = SpotifyClientCredentials(cache_handler=cache_handler)
         self.client = spotipy.Spotify(auth_manager=auth_manager)
 
     @staticmethod

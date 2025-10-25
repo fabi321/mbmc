@@ -10,9 +10,9 @@ from musicbrainz_submit.providers._mb_link_types import (
     RELEASE_STREAMING,
 )
 from musicbrainz_submit.providers.provider import Provider, Album, Track, ArtistFormat
+from musicbrainz_submit.util import CONFIG_DIR
 
-SESSION_FILE: Path = Path(__file__).parent.parent / ".sessions" / "tidal-session.txt"
-SESSION_FILE.parent.mkdir(parents=True, exist_ok=True)
+SESSION_FILE: Path = CONFIG_DIR / "tidal-session.txt"
 
 
 class TidalProvider(Provider):

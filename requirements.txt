@@ -13,3 +13,4 @@ musicbrainzngs
 fuzzywuzzy[speedup]
 transliterate
 tqdm
+platformdirs
