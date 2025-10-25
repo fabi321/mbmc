@@ -45,6 +45,7 @@ def main() -> int:
     progress.start()
 
     providers = get_providers(MB_ID, queue, args.banned_urls)
+    mb_provider = providers[-1]
 
     queue.put(None)
     queue.join()
@@ -55,43 +56,42 @@ def main() -> int:
     print(f"Missing releases: {', '.join(missing.keys())}")
 
     while missing:
-        album, ignored_providers = missing.popitem()
+        album, current_providers = missing.popitem()
         gathered_responses: list[Album] = []
-        for provider in providers:
-            if provider in ignored_providers:
-                continue
-            if not gathered_responses and isinstance(provider, MusicBrainzProvider):
-                # If everything has been ignored, don't show MB provider
-                continue
+        for provider in current_providers:
             provider.query = album
             response = app.ask_question(provider)
             if response[1]:
                 gathered_responses.append(response[1])
         if gathered_responses:
-            ignored_providers.extend(album.provider for album in gathered_responses)
-            for i, provider in enumerate(ignored_providers):
-                if isinstance(provider, MusicBrainzProvider):
-                    # Never ignore MusicBrainzProvider
-                    ignored_providers.pop(i)
-                    break
-            if len(ignored_providers) != len(providers):
+            for response in gathered_responses:
+                current_providers.remove(response.provider)
+            mb_provider.query = album
+            mb_response = app.ask_question(mb_provider)
+            if mb_response[1]:
+                gathered_responses.append(mb_response[1])
+            if len(current_providers) != 0:
                 # If not all missing providers are processed, re-add to missing
-                missing[album] = ignored_providers
+                missing[album] = current_providers
             if any(
                 isinstance(album.provider, MusicBrainzProvider)
                 for album in gathered_responses
             ):
                 mb_id, current_actions = merge_with_musicbrainz(gathered_responses)
                 edit_release(mb_id, current_actions, not args.no_harmony)
+                for response in gathered_responses:
+                    response.provider.fetch().remove(response)
             else:
                 results = to_mb_release(gathered_responses, app)
                 if results:
                     add_release(results, not args.no_harmony)
+                    for response in gathered_responses:
+                        response.provider.fetch().remove(response)
                 else:
                     for response in gathered_responses:
                         if not isinstance(response.provider, MusicBrainzProvider):
-                            ignored_providers.remove(response.provider)
-                    missing[album] = ignored_providers
+                            current_providers.append(response.provider)
+                    missing[album] = current_providers
 
     input("Press Enter to continue...")
     # when done with GUI:

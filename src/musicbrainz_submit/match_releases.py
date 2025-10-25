@@ -70,28 +70,22 @@ def normalize_name(name: str) -> str:
 def find_missing_releases(
     mb_id: str, providers: list[Provider]
 ) -> dict[str, list[Provider]]:
-    to_find: dict[str, tuple[Provider, Album]] = {}
+    to_find: dict[str, Album] = {}
     for provider in providers:
         if isinstance(provider, MusicBrainzProvider):
             continue
         for album in provider.fetch():
-            to_find[album.url] = (provider, album)
+            to_find[album.url] = album
 
-    found: dict[str, list[Provider]] = {}
     releases = get_releases(mb_id)
     for album in releases:
         for url in album.get("url-relation-list", []):
-            if removed := to_find.pop(normalize_url(url["target"]), None):
-                title: str = normalize_name(album["title"])
-                if title not in found:
-                    found[title] = []
-                found[title].append(removed[0])
+            if found := to_find.pop(normalize_url(url["target"]), None):
+                found.provider.fetch().remove(found)
 
     by_album: dict[str, list[Provider]] = {}
-    for provider, album in to_find.values():
-        by_album[normalize_name(album.title)] = found.get(
-            normalize_name(album.title), []
-        )
+    for album in to_find.values():
+        by_album.setdefault(normalize_name(album.title), []).append(album.provider)
 
     return by_album
 
