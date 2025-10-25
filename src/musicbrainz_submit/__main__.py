@@ -15,6 +15,7 @@ from musicbrainz_submit.match_releases import (
 from musicbrainz_submit.progress import Progress
 from musicbrainz_submit.providers.music_brainz_provider import MusicBrainzProvider
 from musicbrainz_submit.providers.provider import Album
+from musicbrainz_submit.util import BANNED_ALBUMS
 
 
 def main() -> int:
@@ -47,6 +48,10 @@ def main() -> int:
     providers = get_providers(MB_ID, queue, args.banned_urls)
     mb_provider = providers[-1]
 
+    relevant_banned = BANNED_ALBUMS.setdefault(MB_ID, [])
+    for provider in providers:
+        provider.albums = [album for album in provider.albums if album.url not in relevant_banned]
+
     queue.put(None)
     queue.join()
     progress.join()
@@ -61,7 +66,10 @@ def main() -> int:
         for provider in current_providers:
             provider.query = album
             response = app.ask_question(provider)
-            if response[1]:
+            if response[0] == "banned":
+                if response[1]:
+                    relevant_banned.append(response[1].url)
+                    response[1].provider.albums.remove(response[1])
                 gathered_responses.append(response[1])
         if gathered_responses:
             for response in gathered_responses:

@@ -89,6 +89,9 @@ class CollectorApp(tk.Tk):
         tk.Button(
             header, text="Ignore (q)", command=lambda: self._ignore_active()
         ).pack(side=tk.RIGHT, padx=(6, 0))
+        tk.Button(
+            header, text="Ban (b)", command=lambda: self._ban_active()
+        ).pack(side=tk.RIGHT, padx=(6, 0))
 
         self.candidates = provider.filter()
 
@@ -147,11 +150,17 @@ class CollectorApp(tk.Tk):
     def _ignore_active(self):
         if not self.active_provider:
             return
-        # if someone is waiting, set value
         if self._answer_var is not None:
             self._last_answer = ("ignored", None)
             self._answer_var.set("ignored")
-        # tear down UI and notify external callback (non-blocking)
+        self._clear_ui()
+
+    def _ban_active(self):
+        if not self.active_provider:
+            return
+        if self._answer_var is not None:
+            self._last_answer = ("banned", self.candidates[0] if self.candidates else None)
+            self._answer_var.set("banned")
         self._clear_ui()
 
     # ----- selection / keyboard handling -----
@@ -197,6 +206,8 @@ class CollectorApp(tk.Tk):
             self._ignore_active()
         elif k.lower() == "e":
             self._edit_query()
+        elif k.lower() == "b":
+            self._ban_active()
 
     # ----- ask_question API (linear flow) -----
     def ask_question(self, provider: Provider) -> Tuple[str, Optional[Album]]:
