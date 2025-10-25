@@ -70,6 +70,7 @@ def main() -> int:
                 if response[1]:
                     relevant_banned.append(response[1].url)
                     response[1].provider.albums.remove(response[1])
+            elif response[1]:
                 gathered_responses.append(response[1])
         if gathered_responses:
             for response in gathered_responses:
@@ -88,13 +89,13 @@ def main() -> int:
                 mb_id, current_actions = merge_with_musicbrainz(gathered_responses)
                 edit_release(mb_id, current_actions, not args.no_harmony)
                 for response in gathered_responses:
-                    response.provider.fetch().remove(response)
+                    response.provider.albums.remove(response)
             else:
                 results = to_mb_release(gathered_responses, app)
                 if results:
                     add_release(results, not args.no_harmony)
                     for response in gathered_responses:
-                        response.provider.fetch().remove(response)
+                        response.provider.albums.remove(response)
                 else:
                     for response in gathered_responses:
                         if not isinstance(response.provider, MusicBrainzProvider):
