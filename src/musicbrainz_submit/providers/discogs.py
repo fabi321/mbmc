@@ -1,4 +1,3 @@
-from functools import cache
 from typing import List
 
 import discogs_client
@@ -22,10 +21,8 @@ def minutes_to_milliseconds(minutes: str) -> int:
 
 
 class DiscogsProvider(Provider):
-    def __init__(self, discogs_url: str, query: str):
-        super().__init__("Discogs", query)
-        self.discogs_url: str = normalize_url(discogs_url)
-        self.artist_id: str = self.discogs_url.split("/")[-1]
+    def __init__(self):
+        super().__init__("Discogs")
         self.client = discogs_client.Client(USER_AGENT)
 
     @staticmethod
@@ -42,9 +39,8 @@ class DiscogsProvider(Provider):
             for artist in item.artists
         ]
 
-    @cache
-    def fetch(self) -> list[Album]:
-        artist = self.client.artist(self.artist_id)
+    def fetch(self, url: str) -> list[Album]:
+        artist = self.client.artist(url.split("/")[-1])
         finalized: list[Album] = []
         self.set_total_items(len(artist.releases))
         for release in artist.releases:

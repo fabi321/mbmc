@@ -7,8 +7,11 @@ from musicbrainz_submit.providers.provider import Provider, Album, Track
 
 
 class Unfiltered(Provider, ABC):
+    def fetch(self, url: str) -> list[Album]:
+        return []
+
     def filter(self) -> list[Album]:
-        return self.fetch()
+        return self.albums
 
     @staticmethod
     def relevant(url: str) -> bool:
@@ -41,11 +44,8 @@ class Option:
 
 class Select(Unfiltered):
     def __init__(self, title: str, options: list[Option]):
-        super().__init__(title, "")
-        self.options = options
-
-    def fetch(self) -> list[Album]:
-        return [option.to_album(self) for option in self.options]
+        super().__init__(title)
+        self.albums = [option.to_album(self) for option in options]
 
 
 def ask_question(

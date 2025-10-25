@@ -12,14 +12,12 @@ from musicbrainz_submit.providers.provider import Provider, Album, Track, Artist
 
 
 class MetalArchivesProvider(Provider):
-    def __init__(self, ma_url: str, query: str):
-        super().__init__("Metal Archives", query)
-        self.ma_url: str = normalize_url(ma_url)
-        self.artist_id: str = self.ma_url.split("/")[-1]
+    def __init__(self):
+        super().__init__("Metal Archives")
 
-    def fetch(self) -> list[Album]:
+    def fetch(self, url: str) -> list[Album]:
         request = requests.get(
-            f"https://www.metal-archives.com/band/discography/id/{self.artist_id}/tab/all"
+            f"https://www.metal-archives.com/band/discography/id/{url.split('/')[-1]}/tab/all"
         )
         request.raise_for_status()
         all_html = request.text

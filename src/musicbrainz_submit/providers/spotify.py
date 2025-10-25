@@ -1,4 +1,3 @@
-from functools import cache
 from pathlib import Path
 from typing import List
 
@@ -18,10 +17,8 @@ SESSION_FILE: Path = CONFIG_DIR / "spotify-session.txt"
 
 
 class SpotifyProvider(Provider):
-    def __init__(self, spotify_url: str, query: str):
-        super().__init__("Spotify", query)
-        self.spotify_url: str = normalize_url(spotify_url)
-        self.artist_id = self.spotify_url.split("/")[-1]
+    def __init__(self):
+        super().__init__("Spotify")
         cache_handler = CacheFileHandler(cache_path=str(SESSION_FILE))
         auth_manager = SpotifyClientCredentials(cache_handler=cache_handler)
         self.client = spotipy.Spotify(auth_manager=auth_manager)
@@ -33,10 +30,9 @@ class SpotifyProvider(Provider):
             for artist in item["artists"]
         )
 
-    @cache
-    def fetch(self) -> list[Album]:
+    def fetch(self, url: str) -> list[Album]:
         finalized: list[Album] = []
-        last_response = self.client.artist_albums(self.artist_id, limit=50)
+        last_response = self.client.artist_albums(url.split("/")[-1], limit=50)
         raw_items = last_response["items"]
         while last_response["next"]:
             last_response = self.client.next(last_response)

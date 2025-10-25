@@ -1,4 +1,3 @@
-from functools import cache
 from typing import List
 
 import musicbrainzngs as mb
@@ -8,14 +7,11 @@ from musicbrainz_submit.providers.provider import Provider, Album, Track
 
 
 class MusicBrainzProvider(Provider):
-    def __init__(self, mb_url: str, query: str):
-        super().__init__("MusicBrainz", query)
-        self.mb_url: str = mb_url
-        self.mb_id: str = mb_url.rstrip("/").split("/")[-1]
+    def __init__(self):
+        super().__init__("MusicBrainz")
 
-    @cache
-    def fetch(self) -> list[Album]:
-        releases = get_releases(self.mb_id)
+    def fetch(self, url: str) -> list[Album]:
+        releases = get_releases(url.split("/")[-1])
         finalized: list[Album] = []
         self.set_total_items(len(releases))
         for release in releases:

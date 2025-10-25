@@ -75,10 +75,8 @@ class PatchedAppleMusicClient(applemusicpy.AppleMusic):
 
 
 class AppleMusicProvider(Provider):
-    def __init__(self, artist_url: str, query: str):
-        super().__init__("Apple Music", query)
-        self.artist_url: str = normalize_url(artist_url)
-        self.artist_id: str = self.artist_url.split("/")[-1]
+    def __init__(self):
+        super().__init__("Apple Music")
         self.client = PatchedAppleMusicClient("x", "y", "z")
 
     @staticmethod
@@ -89,9 +87,8 @@ class AppleMusicProvider(Provider):
             artists.append((artist["name"], normalize_url(artist["url"])))
         return artists
 
-    @cache
-    def fetch(self) -> list[Album]:
-        artist = self.client.artist(self.artist_id)
+    def fetch(self, url: str) -> list[Album]:
+        artist = self.client.artist(url.split("/")[-1])
         artist: dict = artist["data"][0]
         albums = self.client.collect_items(artist["views"]["full-albums"])
         albums.extend(self.client.collect_items(artist["views"]["appears-on-albums"]))

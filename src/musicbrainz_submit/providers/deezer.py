@@ -1,4 +1,3 @@
-from functools import cache
 from typing import List
 
 from deezer import Client
@@ -12,15 +11,12 @@ from musicbrainz_submit.providers.provider import Provider, Album, Track
 
 
 class DeezerProvider(Provider):
-    def __init__(self, deezer_url: str, query: str):
-        super().__init__("Deezer", query)
-        self.deezer_url: str = normalize_url(deezer_url)
-        self.artist_id: int = int(self.deezer_url.split("/")[-1])
+    def __init__(self):
+        super().__init__("Deezer")
         self.client = Client()
 
-    @cache
-    def fetch(self) -> list[Album]:
-        artist = self.client.get_artist(self.artist_id)
+    def fetch(self, url: str) -> list[Album]:
+        artist = self.client.get_artist(int(url.split("/")[-1]))
         finalized: list[Album] = []
         raw_albums = list(artist.get_albums())
         self.set_total_items(len(raw_albums))

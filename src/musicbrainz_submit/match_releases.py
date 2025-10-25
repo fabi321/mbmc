@@ -51,15 +51,19 @@ def get_providers(
         if url["target"] not in banned_urls:
             relevant_urls.append(url["target"])
     relevant_urls.append(f"https://musicbrainz.org/artist/{mb_id}")
-    pairings: list[tuple[type[Provider], str, Queue[str | tuple[str, int]]]] = []
+    pairings: dict[type[Provider], list[str]] = {cls: [] for cls in PROVIDERS}
 
     for link in relevant_urls:
-        for provider_cls in PROVIDERS:
+        for provider_cls, relevant in pairings.items():
             if provider_cls.relevant(link):
-                pairings.append((provider_cls, link, queue))
+                relevant.append(link)
 
     with ThreadPool(15) as pool:
-        providers = pool.map(prefetch_provider, pairings)
+        providers = pool.map(prefetch_provider, (
+            (provider_cls, links, queue)
+            for provider_cls, links in pairings.items()
+            if links
+        ))
     return providers
 
 
@@ -74,14 +78,14 @@ def find_missing_releases(
     for provider in providers:
         if isinstance(provider, MusicBrainzProvider):
             continue
-        for album in provider.fetch():
+        for album in provider.albums:
             to_find[album.url] = album
 
     releases = get_releases(mb_id)
     for album in releases:
         for url in album.get("url-relation-list", []):
             if found := to_find.pop(normalize_url(url["target"]), None):
-                found.provider.fetch().remove(found)
+                found.provider.albums.remove(found)
 
     by_album: dict[str, list[Provider]] = {}
     for album in to_find.values():

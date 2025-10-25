@@ -1,6 +1,5 @@
 import json
 import re
-from functools import cache
 from typing import TypedDict, List
 
 import requests
@@ -50,10 +49,8 @@ def get_data(artist_name: str, type_: str) -> list[Playlist]:
 
 
 class VkMusicProvider(Provider):
-    def __init__(self, vk_music_url: str, query: str):
-        super().__init__("VK Music", query)
-        self.vk_music_url: str = normalize_url(vk_music_url)
-        self.artist_name: str = self.vk_music_url.split("/")[-1]
+    def __init__(self):
+        super().__init__("VK Music")
 
     @staticmethod
     def author_line_to_artist(author_line: str) -> ArtistFormat:
@@ -68,10 +65,10 @@ class VkMusicProvider(Provider):
                 result.append((child.text, child["href"]))
         return result
 
-    @cache
-    def fetch(self) -> list[Album]:
-        albums = get_data(self.artist_name, "albums")
-        albums.extend(get_data(self.artist_name, "singles"))
+    def fetch(self, url: str) -> list[Album]:
+        artist_name: str = url.split("/")[-1]
+        albums = get_data(artist_name, "albums")
+        albums.extend(get_data(artist_name, "singles"))
         finalized: list[Album] = []
         self.set_total_items(len(albums))
         for album in albums:

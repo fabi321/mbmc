@@ -1,5 +1,4 @@
 from enum import Enum
-from functools import cache
 from typing import List
 
 import bandcamp_lib as bc
@@ -21,14 +20,12 @@ class AlbumType(Enum):
 
 
 class BandcampProvider(Provider):
-    def __init__(self, artist_url: str, query: str) -> None:
-        super().__init__("Bandcamp", query)
-        self.artist_url: str = normalize_url(artist_url)
+    def __init__(self) -> None:
+        super().__init__("Bandcamp")
         self.status: dict[str, AlbumType] = {}
 
-    @cache
-    def fetch(self) -> list[Album]:
-        artist: bc.Artist = bc.artist_from_url_sync(self.artist_url)
+    def fetch(self, url: str) -> list[Album]:
+        artist: bc.Artist = bc.artist_from_url_sync(url)
         finalized: list[Album] = []
         self.set_total_items(len(artist.discography))
         for album_entry in artist.discography:

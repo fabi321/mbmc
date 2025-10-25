@@ -33,12 +33,17 @@ def thumbnail_worker(items: tuple[Album, Queue]):
 
 
 def prefetch_provider(
-    input: tuple[type[Provider], str, Queue[str | tuple[str, int]]],
+    input: tuple[type[Provider], list[str], Queue[str | tuple[str, int]]],
 ) -> Provider:
-    provider_cls, link, queue = input
-    provider = provider_cls(link, "")
+    provider_cls, links, queue = input
+    provider = provider_cls()
     provider.message_queue = queue
-    queue.put(("Thumbnails", len(provider.fetch())))
-    with ThreadPool(3) as pool:
-        pool.map(thumbnail_worker, ((album, queue) for album in provider.fetch()))
+    for url in links:
+        provider.albums.extend(provider.fetch(url))
+    queue.put(("Thumbnails", len(provider.albums)))
+    # Only one at a time for better success rates, and this is usually not a bottleneck
+    for album in provider.albums:
+        if album.thumbnail is not None:
+            album.thumbnail = load_thumbnail(album.thumbnail)
+        queue.put("Thumbnails")
     return provider

@@ -40,10 +40,11 @@ class Album:
 
 
 class Provider(ABC):
-    def __init__(self, name: str, query: str):
+    def __init__(self, name: str):
         self.name: str = name
-        self.query: str = query
+        self.query: str = ""
         self.message_queue: Optional[Queue[str | tuple[str, int]]] = None
+        self.albums: list[Album] = []
 
     def set_total_items(self, total: int) -> None:
         if self.message_queue is not None:
@@ -54,7 +55,7 @@ class Provider(ABC):
             self.message_queue.put(self.name)
 
     @abstractmethod
-    def fetch(self) -> list[Album]:
+    def fetch(self, url: str) -> list[Album]:
         raise NotImplementedError
 
     @staticmethod
@@ -69,9 +70,9 @@ class Provider(ABC):
 
     def filter(self) -> list[Album]:
         """Determine if this provider should be used based on available data."""
-        albums = self.fetch()
+        relevant = [album for album in self.albums if album.status == AlbumStatus.TODO]
         chosen = process.extractBests(
-            self.query, albums, score_cutoff=70, processor=Provider.normalize_name
+            self.query, relevant, score_cutoff=70, processor=Provider.normalize_name
         )
         return [album for album, _ in chosen]
 

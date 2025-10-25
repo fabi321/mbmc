@@ -3,7 +3,6 @@ from typing import List, Literal
 
 import ytmusicapi
 
-from musicbrainz_submit.music_brainz import normalize_url
 from musicbrainz_submit.providers._mb_link_types import (
     ARTIST_YOUTUBE_MUSIC,
     RELEASE_FREE_STREAMING,
@@ -13,10 +12,8 @@ import musicbrainz_submit.yt_music_api_types as types
 
 
 class YouTubeMusicProvider(Provider):
-    def __init__(self, youtube_url: str, query: str):
-        super().__init__("YouTube Music", query)
-        self.youtube_url: str = normalize_url(youtube_url)
-        self.artist_id: str = self.youtube_url.split("/")[-1]
+    def __init__(self):
+        super().__init__("YouTube Music")
         self.client = ytmusicapi.YTMusic(location="NZ")
 
     def get_releases_for_artist(
@@ -40,9 +37,8 @@ class YouTubeMusicProvider(Provider):
             for artist in item["artists"]
         ]
 
-    @cache
-    def fetch(self) -> list[Album]:
-        artist: types.Artist = self.client.get_artist(self.artist_id)
+    def fetch(self, url: str) -> list[Album]:
+        artist: types.Artist = self.client.get_artist(url.split("/")[-1])
         finalized: list[Album] = []
         albums = self.get_releases_for_artist(artist, "albums")
         singles = self.get_releases_for_artist(artist, "singles")

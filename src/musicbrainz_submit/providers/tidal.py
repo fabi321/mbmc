@@ -1,10 +1,8 @@
-from functools import cache
 from pathlib import Path
 from typing import List
 
 import tidalapi
 
-from musicbrainz_submit.music_brainz import normalize_url
 from musicbrainz_submit.providers._mb_link_types import (
     ARTIST_STREAMING,
     RELEASE_STREAMING,
@@ -16,10 +14,8 @@ SESSION_FILE: Path = CONFIG_DIR / "tidal-session.txt"
 
 
 class TidalProvider(Provider):
-    def __init__(self, tidal_url: str, query: str):
-        super().__init__("Tidal", query)
-        self.tidal_url: str = normalize_url(tidal_url)
-        self.artist_id: str = self.tidal_url.split("/")[-1]
+    def __init__(self):
+        super().__init__("Tidal")
         self.session = tidalapi.Session()
         try:
             self.session.load_session_from_file(SESSION_FILE)
@@ -38,9 +34,8 @@ class TidalProvider(Provider):
             ]
         return item.artist.name
 
-    @cache
-    def fetch(self) -> list[Album]:
-        artist = self.session.artist(self.artist_id)
+    def fetch(self, url: str) -> list[Album]:
+        artist = self.session.artist(url.split("/")[-1])
         finalized: list[Album] = []
         raw_albums = artist.get_albums() + artist.get_other() + artist.get_ep_singles()
         self.set_total_items(len(raw_albums))
