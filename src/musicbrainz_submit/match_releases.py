@@ -42,11 +42,14 @@ PROVIDERS = [
 ]
 
 
-def get_providers(mb_id: str, queue: Queue[str | tuple[str, int]]) -> list[Provider]:
+def get_providers(
+    mb_id: str, queue: Queue[str | tuple[str, int]], banned_urls: list[str]
+) -> list[Provider]:
     artist = get_artist(mb_id)
     relevant_urls: list[str] = []
     for url in artist.get("url-relation-list", []):
-        relevant_urls.append(url["target"])
+        if url["target"] not in banned_urls:
+            relevant_urls.append(url["target"])
     relevant_urls.append(f"https://musicbrainz.org/artist/{mb_id}")
     pairings: list[tuple[type[Provider], str, Queue[str | tuple[str, int]]]] = []
 

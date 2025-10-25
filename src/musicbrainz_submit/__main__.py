@@ -25,6 +25,13 @@ def main() -> int:
     parser.add_argument(
         "--no-harmony", "-n", action="store_true", help="Disable Harmony integration"
     )
+    parser.add_argument(
+        "--banned-urls",
+        "-b",
+        action="append",
+        help="Urls that are not to be used",
+        default=[],
+    )
     args = parser.parse_args()
     dotenv.load_dotenv()
     app = CollectorApp()
@@ -37,7 +44,7 @@ def main() -> int:
     progress = Progress(queue)
     progress.start()
 
-    providers = get_providers(MB_ID, queue)
+    providers = get_providers(MB_ID, queue, args.banned_urls)
 
     queue.put(None)
     queue.join()
