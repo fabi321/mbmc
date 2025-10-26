@@ -5,13 +5,13 @@ import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from spotipy.cache_handler import CacheFileHandler
 
-from musicbrainz_submit.music_brainz import normalize_url
-from musicbrainz_submit.providers._mb_link_types import (
+from mbmc.music_brainz import normalize_url
+from mbmc.providers._mb_link_types import (
     ARTIST_FREE_STREAMING,
     RELEASE_FREE_STREAMING,
 )
-from musicbrainz_submit.providers.provider import Provider, Album, Track, ArtistFormat
-from musicbrainz_submit.util import CONFIG_DIR
+from mbmc.providers.provider import Provider, Album, Track, ArtistFormat
+from mbmc.util import CONFIG_DIR
 
 SESSION_FILE: Path = CONFIG_DIR / "spotify-session.txt"
 

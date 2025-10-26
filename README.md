@@ -7,6 +7,7 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.template .env
+pip install -e .
 ```
 
  - Add credentials to `.env` file for Spotify and Tidal.
@@ -17,7 +18,7 @@ cp .env.template .env
 2. Start the script with the artist url as argument.
 
 ```bash
-python -m musicbrainz_submit <artist_url>
+python -m mbmc <artist_url>
 ```
 
 ### General flow

@@ -6,8 +6,8 @@ import webbrowser
 
 from PIL import ImageTk
 
-from musicbrainz_submit.prefetch import load_thumbnail
-from musicbrainz_submit.providers.provider import Provider, Album
+from mbmc.prefetch import load_thumbnail
+from mbmc.providers.provider import Provider, Album
 
 
 # ---------- GUI ----------

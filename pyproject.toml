@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 
 [project]
-name = "musicbrainz-submit"
+name = "mbmc"
 version = "0.0.1"
 description = "TODO: Add description"
 readme = "README.md"
@@ -20,7 +20,6 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
-    "PyJWT",
     "dotenv",
     "pillow",
     "bandcamp-lib",
@@ -36,6 +35,7 @@ dependencies = [
     "fuzzywuzzy[speedup]",
     "transliterate",
     "tqdm",
+    "platformdirs",
 ]
 
 [project.optional-dependencies]

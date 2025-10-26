@@ -4,7 +4,7 @@ from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from threading import Thread
 from webbrowser import open
 
-from musicbrainz_submit.constants import MUSICBRAINZ_PORT
+from mbmc.constants import MUSICBRAINZ_PORT
 
 _form_template = """<!doctype html>
 <meta charset="UTF-8">

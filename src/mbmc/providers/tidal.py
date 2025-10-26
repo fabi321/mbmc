@@ -3,12 +3,12 @@ from typing import List
 
 import tidalapi
 
-from musicbrainz_submit.providers._mb_link_types import (
+from mbmc.providers._mb_link_types import (
     ARTIST_STREAMING,
     RELEASE_STREAMING,
 )
-from musicbrainz_submit.providers.provider import Provider, Album, Track, ArtistFormat
-from musicbrainz_submit.util import CONFIG_DIR
+from mbmc.providers.provider import Provider, Album, Track, ArtistFormat
+from mbmc.util import CONFIG_DIR
 
 SESSION_FILE: Path = CONFIG_DIR / "tidal-session.txt"
 

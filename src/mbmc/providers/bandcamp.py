@@ -3,14 +3,14 @@ from typing import List
 
 import bandcamp_lib as bc
 
-from musicbrainz_submit.music_brainz import normalize_url
-from musicbrainz_submit.providers._mb_link_types import (
+from mbmc.music_brainz import normalize_url
+from mbmc.providers._mb_link_types import (
     ARTIST_BANDCAMP,
     RELEASE_DOWNLOAD_FOR_FREE,
     RELEASE_PURCHASE_FOR_DOWNLOAD,
     RELEASE_FREE_STREAMING,
 )
-from musicbrainz_submit.providers.provider import Provider, Album, Track
+from mbmc.providers.provider import Provider, Album, Track
 
 
 class AlbumType(Enum):

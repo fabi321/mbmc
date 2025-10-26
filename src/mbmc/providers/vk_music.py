@@ -5,12 +5,12 @@ from typing import TypedDict, List
 import requests
 from bs4 import BeautifulSoup, Tag
 
-from musicbrainz_submit.music_brainz import normalize_url
-from musicbrainz_submit.providers._mb_link_types import (
+from mbmc.music_brainz import normalize_url
+from mbmc.providers._mb_link_types import (
     ARTIST_FREE_STREAMING,
     RELEASE_FREE_STREAMING,
 )
-from musicbrainz_submit.providers.provider import Provider, Album, ArtistFormat
+from mbmc.providers.provider import Provider, Album, ArtistFormat
 
 
 class Playlist(TypedDict):

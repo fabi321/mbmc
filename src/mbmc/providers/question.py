@@ -2,8 +2,8 @@ from abc import ABC
 from dataclasses import dataclass
 from typing import Optional, List, TypeVar, Union, Callable
 
-from musicbrainz_submit.gui import CollectorApp
-from musicbrainz_submit.providers.provider import Provider, Album, Track
+from mbmc.gui import CollectorApp
+from mbmc.providers.provider import Provider, Album, Track
 
 
 class Unfiltered(Provider, ABC):

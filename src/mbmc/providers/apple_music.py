@@ -7,12 +7,12 @@ import requests
 from bs4 import BeautifulSoup
 import applemusicpy
 
-from musicbrainz_submit.music_brainz import normalize_url
-from musicbrainz_submit.providers._mb_link_types import (
+from mbmc.music_brainz import normalize_url
+from mbmc.providers._mb_link_types import (
     ARTIST_STREAMING,
     RELEASE_STREAMING,
 )
-from musicbrainz_submit.providers.provider import Provider, Album, Track, ArtistFormat
+from mbmc.providers.provider import Provider, Album, Track, ArtistFormat
 
 
 @cache

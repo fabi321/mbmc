@@ -3,30 +3,30 @@ from multiprocessing.pool import ThreadPool
 from queue import Queue
 from typing import Optional
 
-from musicbrainz_submit.gui import CollectorApp
-from musicbrainz_submit.music_brainz import (
+from mbmc.gui import CollectorApp
+from mbmc.music_brainz import (
     get_artist,
     get_releases,
     find_url,
     normalize_url,
 )
-from musicbrainz_submit.prefetch import prefetch_provider
-from musicbrainz_submit.providers.apple_music import AppleMusicProvider
-from musicbrainz_submit.providers.bandcamp import BandcampProvider
-from musicbrainz_submit.providers.deezer import DeezerProvider
-from musicbrainz_submit.providers.discogs import DiscogsProvider
-from musicbrainz_submit.providers.music_brainz_provider import MusicBrainzProvider
-from musicbrainz_submit.providers.provider import Provider, Album, ArtistFormat, Track, AlbumStatus
-from musicbrainz_submit.providers.question import (
+from mbmc.prefetch import prefetch_provider
+from mbmc.providers.apple_music import AppleMusicProvider
+from mbmc.providers.bandcamp import BandcampProvider
+from mbmc.providers.deezer import DeezerProvider
+from mbmc.providers.discogs import DiscogsProvider
+from mbmc.providers.music_brainz_provider import MusicBrainzProvider
+from mbmc.providers.provider import Provider, Album, ArtistFormat, Track, AlbumStatus
+from mbmc.providers.question import (
     pick_reduction_option,
     ask_question,
     Option,
     PREVIOUS_MAPPINGS,
 )
-from musicbrainz_submit.providers.spotify import SpotifyProvider
-from musicbrainz_submit.providers.tidal import TidalProvider
-from musicbrainz_submit.providers.vk_music import VkMusicProvider
-from musicbrainz_submit.providers.youtube_music import YouTubeMusicProvider
+from mbmc.providers.spotify import SpotifyProvider
+from mbmc.providers.tidal import TidalProvider
+from mbmc.providers.vk_music import VkMusicProvider
+from mbmc.providers.youtube_music import YouTubeMusicProvider
 
 PROVIDERS = [
     BandcampProvider,

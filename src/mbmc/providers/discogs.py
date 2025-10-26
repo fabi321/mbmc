@@ -3,10 +3,10 @@ from typing import List
 import discogs_client
 from discogs_client import Master
 
-from musicbrainz_submit.constants import USER_AGENT
-from musicbrainz_submit.music_brainz import normalize_url
-from musicbrainz_submit.providers._mb_link_types import ARTIST_DISCOGS, RELEASE_DISCOGS
-from musicbrainz_submit.providers.provider import Provider, Album, Track
+from mbmc.constants import USER_AGENT
+from mbmc.music_brainz import normalize_url
+from mbmc.providers._mb_link_types import ARTIST_DISCOGS, RELEASE_DISCOGS
+from mbmc.providers.provider import Provider, Album, Track
 
 
 def minutes_to_milliseconds(minutes: str) -> int:

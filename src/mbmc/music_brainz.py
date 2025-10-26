@@ -4,7 +4,7 @@ from typing import Optional
 
 import musicbrainzngs as mb
 
-from musicbrainz_submit.constants import USER_AGENT
+from mbmc.constants import USER_AGENT
 
 mb.set_useragent(*USER_AGENT.split("/"))
 

@@ -2,8 +2,8 @@ from typing import List
 
 import musicbrainzngs as mb
 
-from musicbrainz_submit.music_brainz import get_releases
-from musicbrainz_submit.providers.provider import Provider, Album, Track
+from mbmc.music_brainz import get_releases
+from mbmc.providers.provider import Provider, Album, Track
 
 
 class MusicBrainzProvider(Provider):

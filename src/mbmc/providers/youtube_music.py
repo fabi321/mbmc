@@ -3,12 +3,12 @@ from typing import List, Literal
 
 import ytmusicapi
 
-from musicbrainz_submit.providers._mb_link_types import (
+from mbmc.providers._mb_link_types import (
     ARTIST_YOUTUBE_MUSIC,
     RELEASE_FREE_STREAMING,
 )
-from musicbrainz_submit.providers.provider import Provider, Album, Track, ArtistFormat
-import musicbrainz_submit.yt_music_api_types as types
+from mbmc.providers.provider import Provider, Album, Track, ArtistFormat
+import mbmc.yt_music_api_types as types
 
 
 class YouTubeMusicProvider(Provider):

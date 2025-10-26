@@ -7,8 +7,8 @@ from typing import Optional
 from PIL import Image
 from PIL.ImageFile import ImageFile
 
-from musicbrainz_submit.constants import USER_AGENT
-from musicbrainz_submit.providers.provider import Provider, Album
+from mbmc.constants import USER_AGENT
+from mbmc.providers.provider import Provider, Album
 
 
 def load_thumbnail(url: str | ImageFile) -> Optional[ImageFile]:

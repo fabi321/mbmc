@@ -4,18 +4,18 @@ from queue import Queue
 
 import dotenv
 
-from musicbrainz_submit.addrelease import start_server, edit_release, add_release
-from musicbrainz_submit.gui import CollectorApp
-from musicbrainz_submit.match_releases import (
+from mbmc.addrelease import start_server, edit_release, add_release
+from mbmc.gui import CollectorApp
+from mbmc.match_releases import (
     get_providers,
     find_missing_releases,
     merge_with_musicbrainz,
     to_mb_release,
 )
-from musicbrainz_submit.progress import Progress
-from musicbrainz_submit.providers.music_brainz_provider import MusicBrainzProvider
-from musicbrainz_submit.providers.provider import Album, AlbumStatus
-from musicbrainz_submit.util import BANNED_ALBUMS
+from mbmc.progress import Progress
+from mbmc.providers.music_brainz_provider import MusicBrainzProvider
+from mbmc.providers.provider import Album, AlbumStatus
+from mbmc.util import BANNED_ALBUMS
 
 
 def main() -> int:
