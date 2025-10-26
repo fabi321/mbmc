@@ -64,3 +64,12 @@ When prompted to select an artist, there will be multiple Possibilities:
  - [Artist] Artist that has been matched to a Musicbrainz artist automatically
  - {Artist} Artist that was not found on Musicbrainz
  - everything else will be join phrases (like `, ` or ` feat. `)
+
+## Banning albums
+
+If you decide to ban an album, the top most album from the current search results will be banned.
+This is useful, if a streaming service mixes up multiple real artists into one artist page, and you expect to run the
+program again in the future (i.e. to add new releases).
+
+Banning will only ban that particular artist-album combination (artist being identified by mbid, and album by url), so
+you will still see the banned album for other artists (useful for featured tracks).
