@@ -54,6 +54,10 @@ class BandcampProvider(Provider):
                 )
                 for track in album.tracks
             ]
+            if len(tracks) == 1:
+                # Bandcamp sometimes spits out interesting track numbers for singles, see
+                # https://ranarvegr.bandcamp.com/track/ko-lga-16
+                tracks[0].track_nr = 1
             type_ = AlbumType.Purchasable
             if all(track.is_streamable for track in album.tracks):
                 type_ = AlbumType.Streamable
