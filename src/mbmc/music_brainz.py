@@ -8,7 +8,7 @@ from mbmc.constants import USER_AGENT
 
 mb.set_useragent(*USER_AGENT.split("/"))
 
-MATCHED_URLS: dict[str, str] = {}
+MATCHED_URLS: dict[str, Optional[str]] = {}
 
 
 def normalize_url(url: str) -> str:
@@ -35,12 +35,13 @@ def find_url(url: str) -> Optional[str]:
         result = None
     target: Optional[str] = None
     if result:
-        for artist in result.get("artist-relation-list", []):
-            target = artist["artist"]["id"]
-        for rg in result.get("release-relation-list", []):
-            target = rg["release"]["id"]
-    if target:
-        MATCHED_URLS[normalize_url(url)] = target
+        artists = result['url'].get("artist-relation-list", [])
+        if len(artists) == 1:
+            target = artists[0]["artist"]["id"]
+        releases = result['url'].get("release-relation-list", [])
+        if len(releases) == 1:
+            target = releases[0]["release"]["id"]
+    MATCHED_URLS[normalize_url(url)] = target
     return target
 
 
