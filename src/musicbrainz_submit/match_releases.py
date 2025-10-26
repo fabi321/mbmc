@@ -16,7 +16,7 @@ from musicbrainz_submit.providers.bandcamp import BandcampProvider
 from musicbrainz_submit.providers.deezer import DeezerProvider
 from musicbrainz_submit.providers.discogs import DiscogsProvider
 from musicbrainz_submit.providers.music_brainz_provider import MusicBrainzProvider
-from musicbrainz_submit.providers.provider import Provider, Album, ArtistFormat, Track
+from musicbrainz_submit.providers.provider import Provider, Album, ArtistFormat, Track, AlbumStatus
 from musicbrainz_submit.providers.question import (
     pick_reduction_option,
     ask_question,
@@ -71,9 +71,7 @@ def normalize_name(name: str) -> str:
     return name.lower().strip()
 
 
-def find_missing_releases(
-    mb_id: str, providers: list[Provider]
-) -> dict[str, list[Provider]]:
+def find_missing_releases(mb_id: str, providers: list[Provider]):
     to_find: dict[str, Album] = {}
     for provider in providers:
         if isinstance(provider, MusicBrainzProvider):
@@ -84,14 +82,8 @@ def find_missing_releases(
     releases = get_releases(mb_id)
     for album in releases:
         for url in album.get("url-relation-list", []):
-            if found := to_find.pop(normalize_url(url["target"]), None):
-                found.provider.albums.remove(found)
-
-    by_album: dict[str, list[Provider]] = {}
-    for album in to_find.values():
-        by_album.setdefault(normalize_name(album.title), []).append(album.provider)
-
-    return by_album
+            if found := to_find.get(normalize_url(url["target"]), None):
+                found.status = AlbumStatus.COMPLETED
 
 
 def merge_with_musicbrainz(albums: list[Album]) -> tuple[str, list[tuple[str, str]]]:
@@ -393,4 +385,6 @@ def to_mb_release(albums: list[Album], app: CollectorApp) -> Optional[dict[str, 
     edit_note += "\n Added via mbmc: https://github.com/fabi321/mbmc"
     result["edit_note"] = edit_note
     result["status"] = "official"
+    for album in albums:
+        album.status = AlbumStatus.COMPLETED
     return result
