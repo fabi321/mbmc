@@ -117,8 +117,8 @@ class AppleMusicProvider(Provider):
             finalized.append(
                 Album(
                     title=album["attributes"]["name"]
-                    .removesuffix(" - EP")
-                    .removesuffix(" - Single"),
+                    .replace(" - EP", "")
+                    .replace(" - Single", ""),
                     artist=AppleMusicProvider.item_to_artist(album, resources),
                     release_date=album["attributes"]["releaseDate"],
                     tracks=tracks,
