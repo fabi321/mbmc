@@ -36,7 +36,7 @@ class MusicBrainzProvider(Provider):
                 pass
             extra_info: Optional[str] = None
             if len(release["medium-list"]) >= 1:
-                extra_info = f"({release['medium-list'][0].get('format', 'Unknown Format')}"
+                extra_info = f"({release['medium-list'][0].get('format', 'Unknown Format')})"
             finalized.append(
                 Album(
                     title=release["title"],
