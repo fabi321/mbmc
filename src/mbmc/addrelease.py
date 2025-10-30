@@ -64,8 +64,10 @@ def resolve_urls(urls: list[tuple[str, str]], harmony: bool) -> list[tuple[str, 
     return resolved
 
 
-def edit_release(mb_id: str, urls: list[tuple[str, str]], harmony: bool):
-    ACTIONS[mb_id] = (f"release/{mb_id}/edit", resolve_urls(urls, harmony))
+def edit_release(mb_id: str, form_data: dict[str, str], harmony: bool):
+    if harmony:
+        form_data["redirect_uri"] = "https://harmony.pulsewidth.org.uk/release/actions"
+    ACTIONS[mb_id] = (f"release/{mb_id}/edit", list(form_data.items()))
     open(f"http://localhost:{MUSICBRAINZ_PORT}/{mb_id}")
 
 

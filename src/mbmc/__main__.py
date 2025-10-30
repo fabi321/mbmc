@@ -9,8 +9,7 @@ from mbmc.gui import CollectorApp
 from mbmc.match_releases import (
     get_providers,
     find_missing_releases,
-    merge_with_musicbrainz,
-    to_mb_release,
+    to_mb_release, merge_mb_release,
 )
 from mbmc.progress import Progress
 from mbmc.providers.music_brainz_provider import MusicBrainzProvider
@@ -89,7 +88,7 @@ def main() -> int:
                 isinstance(album.provider, MusicBrainzProvider)
                 for album in gathered_responses
             ):
-                mb_id, current_actions = merge_with_musicbrainz(gathered_responses)
+                mb_id, current_actions = merge_mb_release(gathered_responses, app)
                 edit_release(mb_id, current_actions, not args.no_harmony)
                 for album in gathered_responses:
                     album.status = AlbumStatus.COMPLETED

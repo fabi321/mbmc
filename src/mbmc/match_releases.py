@@ -86,22 +86,6 @@ def find_missing_releases(mb_id: str, providers: list[Provider]):
                 found.status = AlbumStatus.COMPLETED
 
 
-def merge_with_musicbrainz(albums: list[Album]) -> tuple[str, list[tuple[str, str]]]:
-    mb_album: Optional[Album] = None
-    for album in albums:
-        if isinstance(album.provider, MusicBrainzProvider):
-            mb_album = album
-            break
-    assert mb_album is not None
-    albums.remove(mb_album)
-
-    merged: list[tuple[str, str]] = []
-    for album in albums:
-        for url_type in album.provider.url_types(album):
-            merged.append((album.url, url_type))
-    return mb_album.extra_data["mbid"], merged
-
-
 def album_to_track_layout(album: Album) -> tuple[str, list[tuple[int, int]]]:
     tracks = [(track.disk_nr, track.track_nr) for track in album.tracks]
     # combine disk layout into single string for easy comparison
@@ -388,3 +372,60 @@ def to_mb_release(albums: list[Album], app: CollectorApp) -> Optional[dict[str, 
     for album in albums:
         album.status = AlbumStatus.COMPLETED
     return result
+
+
+def merge_mb_release(albums: list[Album], app: CollectorApp) -> Optional[tuple[str, dict[str, str]]]:
+    non_mb = []
+    mb_release = None
+    for album in albums:
+        if isinstance(album.provider, MusicBrainzProvider):
+            mb_release = album
+        else:
+            non_mb.append(album)
+    assert mb_release is not None
+    assert non_mb
+    PREVIOUS_MAPPINGS.clear()
+    track_layout = pick_reduction_option(
+        "Select track layout", albums, album_to_track_layout, app
+    )
+    if track_layout is None:
+        return None
+    # Remove albums that don't match the chosen track layout
+    for i in range(len(albums) - 1, -1, -1):
+        if not albums[i].tracks:
+            continue
+        if len(albums[i].tracks) != len(track_layout):
+            removed = albums.pop(i)
+            if removed == mb_release:
+                return None
+    release_date = pick_reduction_option(
+        "Select release date", albums, album_to_release_date, app
+    )
+    if release_date is None:
+        return None
+    barcode = pick_reduction_option("Select barcode", albums, album_to_barcode, app)
+    result: dict[str, str] = {}
+    counter = 0
+    for album in albums:
+        for url_type in album.provider.url_types(album):
+            result[f"urls.{counter}.url"] = album.url
+            result[f"urls.{counter}.link_type"] = url_type
+            counter += 1
+    if barcode:
+        result["barcode"] = barcode
+    if release_date.count("-") == 0:
+        result["events.0.date.year"] = release_date
+    elif release_date.count("-") == 2:
+        year, month, day = release_date.split("-")
+        result["events.0.date.year"] = year
+        result["events.0.date.month"] = month
+        result["events.0.date.day"] = day
+    result["events.0.country"] = mb_release.extra_data["release_country"] or "XW"
+    edit_note: str = ""
+    for album in albums:
+        edit_note += f"Sourced from {album.url}\n"
+    edit_note += "\n Matched via mbmc: https://github.com/fabi321/mbmc"
+    result["edit_note"] = edit_note
+    for album in albums:
+        album.status = AlbumStatus.COMPLETED
+    return mb_release.extra_data["mbid"], result
