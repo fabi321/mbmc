@@ -29,6 +29,10 @@ def normalize_url(url: str) -> str:
 def find_url(url: str) -> Optional[str]:
     if url in MATCHED_URLS:
         return MATCHED_URLS[url]
+    if url.startswith("https://musicbrainz.org/artist/"):
+        mb_id = url.split("/")[-1]
+        MATCHED_URLS[normalize_url(url)] = mb_id
+        return mb_id
     try:
         result = mb.browse_urls(url, includes=["artist-rels", "release-rels"])
     except mb.ResponseError:
