@@ -44,7 +44,7 @@ class MusicBrainzProvider(Provider):
                     artist=release["artist-credit-phrase"],
                     release_date=release.get("date", "Unknown"),
                     tracks=tracks,
-                    extra_data={"mbid": release["id"]},
+                    extra_data={"mbid": release["id"], "release_country": release.get("country", None)},
                     thumbnail=thumbnail,
                     upn=release.get("barcode", None),
                     extra_info=extra_info,
