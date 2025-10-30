@@ -237,7 +237,7 @@ def album_to_release_date(album: Album) -> tuple[str, str]:
 
 
 def album_to_barcode(album: Album) -> tuple[str, str]:
-    barcode = album.extra_data.get("barcode", "")
+    barcode = album.upn or ""
     return barcode, barcode
 
 
