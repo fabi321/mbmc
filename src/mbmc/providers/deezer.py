@@ -38,7 +38,6 @@ class DeezerProvider(Provider):
                     artist=[(album.artist.name, normalize_url(album.artist.link))],
                     release_date=f"{album.release_date:%Y-%m-%d}",
                     tracks=tracks,
-                    snippet=f"By {album.artist.name}, released {album.release_date:%Y-%m-%d}",
                     url=normalize_url(album.link),
                     thumbnail=album.cover_medium,
                     genre=[genre.name.lower() for genre in album.genres],

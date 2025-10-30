@@ -78,7 +78,6 @@ class VkMusicProvider(Provider):
                     artist=VkMusicProvider.author_line_to_artist(album["authorLine"]),
                     release_date="",
                     tracks=[],
-                    snippet=f"By {album['authorName']}",
                     url=f"https://vk.com/music/album/{album['ownerId']}_{album['id']}",
                     thumbnail=album["coverUrl"],
                     provider=self,

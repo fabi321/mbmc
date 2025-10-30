@@ -74,7 +74,6 @@ class BandcampProvider(Provider):
                     artist=artist_name,
                     release_date=f"{album.release_date:%Y-%m-%d}",
                     tracks=tracks,
-                    snippet=f"By {album_entry.artist_name or album.band.name}, released {album.release_date:%Y-%m-%d}",
                     url=normalize_url(album.url),
                     thumbnail=album.image.get_with_resolution(bc.ImageResolution.Px420),
                     genre=genres,

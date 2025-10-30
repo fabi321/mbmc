@@ -69,7 +69,6 @@ class DiscogsProvider(Provider):
                     artist=DiscogsProvider.item_to_artist(release),
                     release_date=str(release.year) if release.year else "Unknown",
                     tracks=tracks,
-                    snippet=f"By {', '.join(artist.name for artist in release.artists)}, released {release.year if release.year else 'Unknown'}",
                     url=normalize_url(release.url),
                     thumbnail=release.data.get("thumb", None),
                     genre=[genre.lower() for genre in release.genres],

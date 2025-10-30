@@ -23,6 +23,10 @@ class Unfiltered(Provider, ABC):
     def artist_url_types(self) -> List[str]:
         return []
 
+    @staticmethod
+    def format_snippet(album: Album) -> str:
+        return album.extra_info if album.extra_info else ""
+
 
 @dataclass
 class Option:
@@ -32,13 +36,13 @@ class Option:
     def to_album(self, provider: Provider) -> Album:
         return Album(
             title=self.prompt,
-            snippet=self.snippet or "",
             url="",
             thumbnail=None,
             provider=provider,
             artist="",
             release_date="",
             tracks=[],
+            extra_info=self.snippet,
         )
 
 

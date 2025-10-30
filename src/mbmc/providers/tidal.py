@@ -60,7 +60,6 @@ class TidalProvider(Provider):
                     release_date=f"{album.release_date:%Y-%m-%d}",
                     tracks=tracks,
                     upn=album.universal_product_number,
-                    snippet=f"By {artist_name}, released {album.release_date:%Y-%m-%d}",
                     url=f"https://tidal.com/album/{album.id}",
                     thumbnail=album.image(640),
                     provider=self,

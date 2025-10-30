@@ -98,6 +98,7 @@ class CollectorApp(tk.Tk):
         # list frame (only actual candidates)
         self.list_frame = tk.Frame(self.container)
         self.list_frame.pack(fill=tk.BOTH, expand=True, pady=6)
+        c: Album
         for i, c in enumerate(self.candidates):
             row = tk.Frame(self.list_frame)
             row.pack(fill=tk.X, pady=2)
@@ -124,7 +125,7 @@ class CollectorApp(tk.Tk):
                 wraplength=480,
             ).pack(anchor="w")
             tk.Label(
-                textframe, text=c.snippet, anchor="w", wraplength=480, fg="#444"
+                textframe, text=c.provider.format_snippet(c), anchor="w", wraplength=480, fg="#444"
             ).pack(anchor="w")
 
             tk.Button(

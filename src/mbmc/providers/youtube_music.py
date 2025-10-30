@@ -62,7 +62,6 @@ class YouTubeMusicProvider(Provider):
                     artist=YouTubeMusicProvider.item_to_artist(album),
                     release_date=album.get("year", "Unknown"),
                     tracks=tracks,
-                    snippet=f"By {', '.join(artist['name'] for artist in album['artists'])}, released {album.get('year', 'Unknown')}",
                     url=f"https://music.youtube.com/playlist?list={album['audioPlaylistId']}",
                     thumbnail=album.get("thumbnails", [{}])[-1].get("url", None),
                     provider=self,

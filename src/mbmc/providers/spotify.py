@@ -56,7 +56,6 @@ class SpotifyProvider(Provider):
                     artist=SpotifyProvider.item_to_artist(album),
                     release_date=album["release_date"],
                     tracks=tracks,
-                    snippet=f"By {', '.join(artist['name'] for artist in album['artists'])}, released {album['release_date']}",
                     url=normalize_url(album["external_urls"]["spotify"]),
                     thumbnail=album["images"][0]["url"] if album["images"] else None,
                     provider=self,

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 import musicbrainzngs as mb
 
@@ -34,16 +34,20 @@ class MusicBrainzProvider(Provider):
                         break
             except:
                 pass
+            extra_info: Optional[str] = None
+            if len(release["medium-list"]) >= 1:
+                extra_info = f"({release['medium-list'][0].get('format', 'Unknown Format')}"
             finalized.append(
                 Album(
                     title=release["title"],
-                    snippet=f"By {release['artist-credit-phrase']}",
                     url=f"https://musicbrainz.org/release/{release['id']}",
                     artist=release["artist-credit-phrase"],
                     release_date=release.get("date", "Unknown"),
                     tracks=tracks,
                     extra_data={"mbid": release["id"]},
                     thumbnail=thumbnail,
+                    upn=release.get("barcode", None),
+                    extra_info=extra_info,
                     provider=self,
                 )
             )

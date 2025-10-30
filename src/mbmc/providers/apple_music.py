@@ -123,7 +123,6 @@ class AppleMusicProvider(Provider):
                     release_date=album["attributes"]["releaseDate"],
                     tracks=tracks,
                     upn=album["attributes"].get("upc", None),
-                    snippet=f"By {base_album['artistName']}, released {base_album['releaseDate']}",
                     url=normalize_url(base_album["url"]),
                     thumbnail=base_album["artwork"]["url"].replace(
                         "{w}x{h}", "640x640"

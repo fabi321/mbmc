@@ -36,7 +36,6 @@ class MetalArchivesProvider(Provider):
             finalized.append(
                 Album(
                     title=album_title,
-                    snippet=f"Released {release_year} ({release_type})",
                     url=album_url,
                     thumbnail=None,
                     provider=self,

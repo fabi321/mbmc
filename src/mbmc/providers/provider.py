@@ -36,7 +36,6 @@ class AlbumStatus(Enum):
 class Album:
     provider: Provider
     title: str
-    snippet: str
     url: str
     artist: ArtistFormat
     release_date: str
@@ -45,6 +44,7 @@ class Album:
     genre: list[str] = field(default_factory=list)
     upn: Optional[int] = None
     extra_data: dict[str, Any] = field(default_factory=dict)
+    extra_info: Optional[str] = None
     status: AlbumStatus = AlbumStatus.TODO
 
 
@@ -108,6 +108,35 @@ class Provider(ABC):
         for a in self.albums:
             if a.title.lower().strip() == album:
                 a.status = AlbumStatus.IGNORED
+
+    @staticmethod
+    def format_artist_credit(artist: ArtistFormat) -> str:
+        if isinstance(artist, str):
+            return artist
+        result: str = ""
+        has_join_phrase: bool = True
+        for entry in artist:
+            if isinstance(entry, str):
+                result += entry
+                has_join_phrase = not has_join_phrase
+            else:
+                if not has_join_phrase:
+                    result += ", "
+                result += entry[0]
+                has_join_phrase = False
+        return result
+
+    @staticmethod
+    def format_snippet(album: Album) -> str:
+        result: str = f"By {Provider.format_artist_credit(album.artist)}"
+        if album.release_date:
+            result += f", released {album.release_date}"
+        result += f", {len(album.tracks)} tracks"
+        if album.upn:
+            result += f", UPN {album.upn}"
+        if album.extra_info:
+            result += f" {album.extra_info}"
+        return result
 
     @staticmethod
     @abstractmethod
