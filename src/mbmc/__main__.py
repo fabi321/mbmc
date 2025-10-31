@@ -88,10 +88,9 @@ def main() -> int:
                 isinstance(album.provider, MusicBrainzProvider)
                 for album in gathered_responses
             ):
-                mb_id, current_actions = merge_mb_release(gathered_responses, app)
-                edit_release(mb_id, current_actions, not args.no_harmony)
-                for album in gathered_responses:
-                    album.status = AlbumStatus.COMPLETED
+                results = merge_mb_release(gathered_responses, app)
+                if results:
+                    edit_release(results[0], results[1], not args.no_harmony)
             else:
                 results = to_mb_release(gathered_responses, app)
                 if results:
