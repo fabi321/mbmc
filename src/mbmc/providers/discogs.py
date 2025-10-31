@@ -3,6 +3,7 @@ from typing import List
 import discogs_client
 from discogs_client import Master
 
+from mbmc.cache import cached
 from mbmc.constants import USER_AGENT
 from mbmc.music_brainz import normalize_url
 from mbmc.providers._mb_link_types import ARTIST_DISCOGS, RELEASE_DISCOGS
@@ -39,6 +40,37 @@ class DiscogsProvider(Provider):
             for artist in item.artists
         ]
 
+    @cached
+    def get_release(self, release_id: str) -> Album:
+        release = self.client.release(release_id)
+        tracks = []
+        for track in release.tracklist:
+            track_nr = 0
+            try:
+                track_nr = int(track.position)
+            except:
+                pass
+            duration = minutes_to_milliseconds(track.duration or "0:00")
+            tracks.append(
+                Track(
+                    title=track.title,
+                    artist=DiscogsProvider.item_to_artist(track),
+                    duration=duration,
+                    track_nr=track_nr,
+                    provider=self,
+                )
+            )
+        return Album(
+            title=release.title,
+            artist=DiscogsProvider.item_to_artist(release),
+            release_date=str(release.year) if release.year else "Unknown",
+            tracks=tracks,
+            url=normalize_url(release.url),
+            thumbnail=release.data.get("thumb", None),
+            genre=[genre.lower() for genre in release.genres],
+            provider=self,
+        )
+
     def fetch(self, url: str) -> list[Album]:
         artist = self.client.artist(url.split("/")[-1])
         finalized: list[Album] = []
@@ -46,35 +78,11 @@ class DiscogsProvider(Provider):
         for release in artist.releases:
             if isinstance(release, Master):
                 continue
-            tracks = []
-            for track in release.tracklist:
-                track_nr = 0
-                try:
-                    track_nr = int(track.position)
-                except:
-                    pass
-                duration = minutes_to_milliseconds(track.duration or "0:00")
-                tracks.append(
-                    Track(
-                        title=track.title,
-                        artist=DiscogsProvider.item_to_artist(track),
-                        duration=duration,
-                        track_nr=track_nr,
-                        provider=self,
-                    )
-                )
-            finalized.append(
-                Album(
-                    title=release.title,
-                    artist=DiscogsProvider.item_to_artist(release),
-                    release_date=str(release.year) if release.year else "Unknown",
-                    tracks=tracks,
-                    url=normalize_url(release.url),
-                    thumbnail=release.data.get("thumb", None),
-                    genre=[genre.lower() for genre in release.genres],
-                    provider=self,
-                )
-            )
+            release = self.get_release(release.id)
+            release.provider = self
+            for track in release.tracks:
+                track.provider = self
+            finalized.append(release)
             self.finish_item()
         return finalized
 

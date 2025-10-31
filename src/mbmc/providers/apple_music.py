@@ -7,6 +7,7 @@ import requests
 from bs4 import BeautifulSoup
 import applemusicpy
 
+from mbmc.cache import cached
 from mbmc.music_brainz import normalize_url
 from mbmc.providers._mb_link_types import (
     ARTIST_STREAMING,
@@ -87,6 +88,41 @@ class AppleMusicProvider(Provider):
             artists.append((artist["name"], normalize_url(artist["url"])))
         return artists
 
+    @cached
+    def get_album(self, album_id: str) -> Album:
+        resources = self.client.album(album_id)["resources"]
+        tracks = [
+            Track(
+                title=track["attributes"]["name"],
+                artist=AppleMusicProvider.item_to_artist(track, resources),
+                duration=track["attributes"]["durationInMillis"],
+                track_nr=track["attributes"]["trackNumber"],
+                disk_nr=track["attributes"].get("discNumber", 1),
+                provider=self,
+            )
+            for track in resources["songs"].values()
+        ]
+        _, album = resources["albums"].popitem()
+        genres: list[str] = album["attributes"].get("genreNames", [])
+        genres = [genre.lower() for genre in genres]
+        if "music" in genres:
+            genres.remove("music")
+        return Album(
+            title=album["attributes"]["name"]
+            .replace(" - EP", "")
+            .replace(" - Single", ""),
+            artist=AppleMusicProvider.item_to_artist(album, resources),
+            release_date=album["attributes"]["releaseDate"],
+            tracks=tracks,
+            upn=album["attributes"].get("upc", None),
+            url=f"https://music.apple.com/album/{album_id}",
+            thumbnail=album["attributes"]["artwork"]["url"].replace(
+                "{w}x{h}", "640x640"
+            ),
+            genre=genres,
+            provider=self,
+        )
+
     def fetch(self, url: str) -> list[Album]:
         artist = self.client.artist(url.split("/")[-1])
         artist: dict = artist["data"][0]
@@ -97,40 +133,11 @@ class AppleMusicProvider(Provider):
         finalized: list[Album] = []
         self.set_total_items(len(albums))
         for base_album in albums:
-            resources = self.client.album(base_album["url"].split("/")[-1])["resources"]
-            tracks = [
-                Track(
-                    title=track["attributes"]["name"],
-                    artist=AppleMusicProvider.item_to_artist(track, resources),
-                    duration=track["attributes"]["durationInMillis"],
-                    track_nr=track["attributes"]["trackNumber"],
-                    disk_nr=track["attributes"].get("discNumber", 1),
-                    provider=self,
-                )
-                for track in resources["songs"].values()
-            ]
-            _, album = resources["albums"].popitem()
-            genres: list[str] = album["attributes"].get("genreNames", [])
-            genres = [genre.lower() for genre in genres]
-            if "music" in genres:
-                genres.remove("music")
-            finalized.append(
-                Album(
-                    title=album["attributes"]["name"]
-                    .replace(" - EP", "")
-                    .replace(" - Single", ""),
-                    artist=AppleMusicProvider.item_to_artist(album, resources),
-                    release_date=album["attributes"]["releaseDate"],
-                    tracks=tracks,
-                    upn=album["attributes"].get("upc", None),
-                    url=normalize_url(base_album["url"]),
-                    thumbnail=base_album["artwork"]["url"].replace(
-                        "{w}x{h}", "640x640"
-                    ),
-                    genre=genres,
-                    provider=self,
-                )
-            )
+            album = self.get_album(base_album["url"].split("/")[-1])
+            album.provider = self
+            for track in album.tracks:
+                track.provider = self
+            finalized.append(album)
             self.finish_item()
         return finalized
 

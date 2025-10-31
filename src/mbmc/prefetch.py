@@ -1,23 +1,41 @@
 import io
 import urllib.request
-from multiprocessing.pool import ThreadPool
 from queue import Queue
 from typing import Optional
 
 from PIL import Image
 from PIL.ImageFile import ImageFile
+from time import sleep
 
+from mbmc.cache import cached
 from mbmc.constants import USER_AGENT
 from mbmc.providers.provider import Provider, Album
+
+
+@cached
+def get_thumbnail(url: str) -> Optional[bytes]:
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            data = resp.read()
+        return data
+    except:
+        sleep(1)
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                data = resp.read()
+            return data
+        except:
+            return None
+
 
 
 def load_thumbnail(url: str | ImageFile) -> Optional[ImageFile]:
     if isinstance(url, ImageFile):
         return url
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-        with urllib.request.urlopen(req, timeout=5) as resp:
-            data = resp.read()
+        data = get_thumbnail(url)
         im = Image.open(io.BytesIO(data))
         im.thumbnail((120, 120))
         return im

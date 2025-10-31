@@ -24,6 +24,15 @@ class Track:
     track_nr: int
     disk_nr: int = 1
 
+    def __getstate__(self) -> dict[str, Any]:
+        state = self.__dict__.copy()
+        del state["provider"]
+        return state
+
+    def __setstate__(self, state: dict[str, Any]) -> None:
+        self.__dict__.update(state)
+        self.provider = None
+
 
 class AlbumStatus(Enum):
     TODO = "To Do"
@@ -46,6 +55,15 @@ class Album:
     extra_data: dict[str, Any] = field(default_factory=dict)
     extra_info: Optional[str] = None
     status: AlbumStatus = AlbumStatus.TODO
+
+    def __getstate__(self) -> dict[str, Any]:
+        state = self.__dict__.copy()
+        del state["provider"]
+        return state
+
+    def __setstate__(self, state: dict[str, Any]) -> None:
+        self.__dict__.update(state)
+        self.provider = None
 
 
 class Provider(ABC):

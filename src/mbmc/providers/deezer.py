@@ -2,6 +2,7 @@ from typing import List
 
 from deezer import Client
 
+from mbmc.cache import cached
 from mbmc.music_brainz import normalize_url
 from mbmc.providers._mb_link_types import (
     ARTIST_FREE_STREAMING,
@@ -15,36 +16,44 @@ class DeezerProvider(Provider):
         super().__init__("Deezer")
         self.client = Client()
 
+    @cached
+    def get_album(self, album_id: str) -> Album:
+        album = self.client.get_album(int(album_id))
+        tracks = [
+            Track(
+                title=track.title,
+                artist=[(track.artist.name, normalize_url(track.artist.link))],
+                duration=track.duration * 1000,
+                track_nr=track.track_position,
+                disk_nr=track.disk_number,
+                provider=self,
+            )
+            for track in album.get_tracks()
+        ]
+        return Album(
+            title=album.title,
+            artist=[(album.artist.name, normalize_url(album.artist.link))],
+            release_date=f"{album.release_date:%Y-%m-%d}",
+            tracks=tracks,
+            url=normalize_url(album.link),
+            thumbnail=album.cover_medium,
+            genre=[genre.name.lower() for genre in album.genres],
+            upn=int(album.upc) if album.upc else None,
+            provider=self,
+        )
+
+
     def fetch(self, url: str) -> list[Album]:
         artist = self.client.get_artist(int(url.split("/")[-1]))
         finalized: list[Album] = []
         raw_albums = list(artist.get_albums())
         self.set_total_items(len(raw_albums))
         for album in raw_albums:
-            tracks = [
-                Track(
-                    title=track.title,
-                    artist=[(track.artist.name, normalize_url(track.artist.link))],
-                    duration=track.duration * 1000,
-                    track_nr=track.track_position,
-                    disk_nr=track.disk_number,
-                    provider=self,
-                )
-                for track in album.get_tracks()
-            ]
-            finalized.append(
-                Album(
-                    title=album.title,
-                    artist=[(album.artist.name, normalize_url(album.artist.link))],
-                    release_date=f"{album.release_date:%Y-%m-%d}",
-                    tracks=tracks,
-                    url=normalize_url(album.link),
-                    thumbnail=album.cover_medium,
-                    genre=[genre.name.lower() for genre in album.genres],
-                    upn=int(album.upc) if album.upc else None,
-                    provider=self,
-                )
-            )
+            album = self.get_album(album.id)
+            album.provider = self
+            for track in album.tracks:
+                track.provider = self
+            finalized.append(album)
             self.finish_item()
         return finalized
 

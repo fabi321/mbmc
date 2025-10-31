@@ -2,8 +2,21 @@ from typing import List, Optional
 
 import musicbrainzngs as mb
 
+from mbmc.cache import cached
 from mbmc.music_brainz import get_releases
 from mbmc.providers.provider import Provider, Album, Track
+
+
+@cached
+def get_cover_art(mb_id: str) -> Optional[str]:
+    try:
+        cover_art = mb.get_image_list(mb_id)
+        for cover in cover_art["images"]:
+            if cover.get("front", False):
+                return cover.get("thumbnails", {}).get("small", None)
+    except:
+        return None
+    return None
 
 
 class MusicBrainzProvider(Provider):
@@ -25,15 +38,7 @@ class MusicBrainzProvider(Provider):
                 )
                 for track in release["medium-list"][0]["track-list"]
             ]
-            thumbnail = None
-            try:
-                cover_art = mb.get_image_list(release["id"])
-                for cover in cover_art["images"]:
-                    if cover.get("front", False):
-                        thumbnail = cover.get("thumbnails", {}).get("small", None)
-                        break
-            except:
-                pass
+            thumbnail = get_cover_art(release["id"])
             extra_info: Optional[str] = None
             if len(release["medium-list"]) >= 1:
                 extra_info = f"({release['medium-list'][0].get('format', 'Unknown Format')})"
