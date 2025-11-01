@@ -51,7 +51,7 @@ class Album:
     tracks: list[Track]
     thumbnail: Optional[str | ImageFile] = None
     genre: list[str] = field(default_factory=list)
-    upn: Optional[int] = None
+    upn: Optional[str] = None
     extra_data: dict[str, Any] = field(default_factory=dict)
     extra_info: Optional[str] = None
     status: AlbumStatus = AlbumStatus.TODO

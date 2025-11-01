@@ -46,7 +46,6 @@ class SpotifyProvider(Provider):
             for track in self.client.album_tracks(album["id"])["items"]
         ]
         album = self.client.album(album["id"])
-        upn: Optional[str] = album.get("external_ids", {}).get("upc")
         return Album(
             title=album["name"],
             artist=SpotifyProvider.item_to_artist(album),
@@ -54,7 +53,7 @@ class SpotifyProvider(Provider):
             tracks=tracks,
             url=normalize_url(album["external_urls"]["spotify"]),
             thumbnail=album["images"][0]["url"] if album["images"] else None,
-            upn=int(upn) if upn else None,
+            upn=album.get("external_ids", {}).get("upc"),
             provider=self,
         )
 

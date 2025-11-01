@@ -38,7 +38,7 @@ class DeezerProvider(Provider):
             url=normalize_url(album.link),
             thumbnail=album.cover_medium,
             genre=[genre.name.lower() for genre in album.genres],
-            upn=int(album.upc) if album.upc else None,
+            upn=album.upc,
             provider=self,
         )
 
