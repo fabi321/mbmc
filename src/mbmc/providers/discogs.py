@@ -32,9 +32,10 @@ class DiscogsProvider(Provider):
             (
                 artist.name,
                 (
-                    normalize_url(str(artist.url))
+                    (normalize_url(str(artist.url))
                     if artist.id != 194
-                    else "https://www.discogs.com/artist/194"
+                    else "https://www.discogs.com/artist/194") if artist.id != 118760
+                    else "https://www.discogs.com/artist/118760"
                 ),
             )
             for artist in item.artists
