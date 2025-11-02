@@ -26,20 +26,17 @@ class DiscogsProvider(Provider):
         super().__init__("Discogs")
         self.client = discogs_client.Client(USER_AGENT)
 
-    @staticmethod
-    def item_to_artist(item) -> List[tuple[str, str]]:
-        return [
-            (
-                artist.name,
-                (
-                    (normalize_url(str(artist.url))
-                    if artist.id != 194
-                    else "https://www.discogs.com/artist/194") if artist.id != 118760
-                    else "https://www.discogs.com/artist/118760"
-                ),
-            )
-            for artist in item.artists
-        ]
+    @cached
+    def artist_id_to_credit(self, artist_id: int) -> tuple[str, str]:
+        if artist_id == 194:
+            return "Various", "https://www.discogs.com/artist/194"
+        if artist_id == 118760:
+            return "Unknown", "https://www.discogs.com/artist/118760"
+        artist = self.client.artist(artist_id)
+        return artist.name, normalize_url(artist.url)
+
+    def item_to_artist(self, item) -> List[tuple[str, str]]:
+        return [self.artist_id_to_credit(artist.id) for artist in item.artists]
 
     @cached
     def get_release(self, release_id: str) -> Album:
