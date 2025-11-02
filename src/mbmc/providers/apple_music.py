@@ -102,6 +102,7 @@ class AppleMusicProvider(Provider):
             )
             for track in resources["songs"].values()
         ]
+        tracks.sort(key=lambda x: (x.disk_nr, x.track_nr))
         _, album = resources["albums"].popitem()
         genres: list[str] = album["attributes"].get("genreNames", [])
         genres = [genre.lower() for genre in genres]
