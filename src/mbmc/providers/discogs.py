@@ -52,7 +52,7 @@ class DiscogsProvider(Provider):
             tracks.append(
                 Track(
                     title=track.title,
-                    artist=DiscogsProvider.item_to_artist(track),
+                    artist=self.item_to_artist(track),
                     duration=duration,
                     track_nr=track_nr,
                     provider=self,
@@ -60,7 +60,7 @@ class DiscogsProvider(Provider):
             )
         return Album(
             title=release.title,
-            artist=DiscogsProvider.item_to_artist(release),
+            artist=self.item_to_artist(release),
             release_date=str(release.year) if release.year else "Unknown",
             tracks=tracks,
             url=normalize_url(release.url),
