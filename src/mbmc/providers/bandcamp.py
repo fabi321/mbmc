@@ -1,7 +1,9 @@
+import re
 from enum import Enum
 from typing import List
 
 import bandcamp_lib as bc
+import requests
 
 from mbmc.music_brainz import normalize_url
 from mbmc.providers._mb_link_types import (
@@ -68,6 +70,13 @@ class BandcampProvider(Provider):
             for tag in album.tags:
                 if not tag.is_location:
                     genres.append(tag.normalized_name)
+            req = requests.get(album.url)
+            req.raise_for_status()
+            page_content = req.text
+            raw_upc = re.search(r"&quot;upc&quot;:&quot;([0-9]+)&quot;", page_content)
+            upc = None
+            if raw_upc:
+                upc = raw_upc.group(1)
             finalized.append(
                 Album(
                     title=album.title,
@@ -77,6 +86,7 @@ class BandcampProvider(Provider):
                     url=normalize_url(album.url),
                     thumbnail=album.image.get_with_resolution(bc.ImageResolution.Px420),
                     genre=genres,
+                    upn=upc,
                     provider=self,
                 )
             )
