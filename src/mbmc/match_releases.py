@@ -318,6 +318,8 @@ def to_mb_release(albums: list[Album], app: CollectorApp) -> Optional[dict[str, 
     if release_date is None:
         return None
     barcode = pick_reduction_option("Select barcode", albums, album_to_barcode, app)
+    if barcode is None:
+        return None
     release_type = select_release_type(app)
     if release_type is None:
         return None
@@ -404,6 +406,8 @@ def merge_mb_release(albums: list[Album], app: CollectorApp) -> Optional[tuple[s
     if release_date is None:
         return None
     barcode = pick_reduction_option("Select barcode", albums, album_to_barcode, app)
+    if barcode is None:
+        return None
     result: dict[str, str] = {}
     counter = 0
     for album in albums:
