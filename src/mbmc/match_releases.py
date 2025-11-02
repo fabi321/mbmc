@@ -427,5 +427,6 @@ def merge_mb_release(albums: list[Album], app: CollectorApp) -> Optional[tuple[s
     edit_note += "\n Matched via mbmc: https://github.com/fabi321/mbmc"
     result["edit_note"] = edit_note
     for album in albums:
-        album.status = AlbumStatus.COMPLETED
+        if not isinstance(album.provider, MusicBrainzProvider):
+            album.status = AlbumStatus.COMPLETED
     return mb_release.extra_data["mbid"], result
