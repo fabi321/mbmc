@@ -36,14 +36,14 @@ T = TypeVar("T", bound=Callable)
 def cached(func: T) -> T:
     """Decorator to cache function results in a SQLite database."""
 
-    def wrapper(*args):
+    def wrapper(*args, **kwargs):
         if not hasattr(local, "cache"):
             local.cache = sqlite3.connect(CACHE_FILE)
         name = f"{func.__module__}.{func.__qualname__}"
         if '.' in func.__qualname__ and not isinstance(func, staticmethod):
-            input_value = repr(args[1:])  # skip 'self' or 'cls'
+            input_value = repr(args[1:]) + repr(kwargs)  # skip 'self' or 'cls'
         else:
-            input_value = repr(args)
+            input_value = repr(args) + repr(kwargs)
         cursor = local.cache.execute(
             "select rowid, value from cache where name = ? and input_value = ?",
             (name, input_value),
@@ -56,7 +56,7 @@ def cached(func: T) -> T:
             )
             local.cache.commit()
             return pickle.loads(row[1])
-        result = func(*args)
+        result = func(*args, **kwargs)
         local.cache.execute(
             "insert into cache (name, input_value, value) values (?, ?, ?)",
             (name, input_value, pickle.dumps(result)),
