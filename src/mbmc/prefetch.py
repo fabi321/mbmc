@@ -51,7 +51,7 @@ def thumbnail_worker(items: tuple[Album, Queue]):
 
 
 def prefetch_provider(
-    input: tuple[type[Provider], list[str], Queue[str | tuple[str, int]]],
+    input: tuple[type[Provider], set[str], Queue[str | tuple[str, int]]],
 ) -> Provider:
     provider_cls, links, queue = input
     provider = provider_cls()

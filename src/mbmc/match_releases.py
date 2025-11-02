@@ -51,12 +51,12 @@ def get_providers(
         if url["target"] not in banned_urls:
             relevant_urls.append(url["target"])
     relevant_urls.append(f"https://musicbrainz.org/artist/{mb_id}")
-    pairings: dict[type[Provider], list[str]] = {cls: [] for cls in PROVIDERS}
+    pairings: dict[type[Provider], set[str]] = {cls: set() for cls in PROVIDERS}
 
     for link in relevant_urls:
         for provider_cls, relevant in pairings.items():
             if provider_cls.relevant(link):
-                relevant.append(link)
+                relevant.update(link)
 
     with ThreadPool(15) as pool:
         providers = pool.map(prefetch_provider, (
