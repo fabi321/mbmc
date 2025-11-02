@@ -85,7 +85,7 @@ def pick_reduction_option(
             continue
         mapping.setdefault(prompt, (value, []))[1].append(album.provider.name)
     if len(mapping) == 0:
-        return None
+        return ""
     if len(mapping) == 1:
         # Only one option, return it
         return next(iter(mapping.values()))[0]
