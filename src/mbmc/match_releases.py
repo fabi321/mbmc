@@ -56,7 +56,7 @@ def get_providers(
     for link in relevant_urls:
         for provider_cls, relevant in pairings.items():
             if provider_cls.relevant(link):
-                relevant.add(link)
+                relevant.add(normalize_url(link))
 
     with ThreadPool(15) as pool:
         providers = pool.map(prefetch_provider, (
