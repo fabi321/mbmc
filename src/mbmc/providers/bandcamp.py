@@ -25,7 +25,6 @@ class AlbumType(Enum):
 class BandcampProvider(Provider):
     def __init__(self) -> None:
         super().__init__("Bandcamp")
-        self.status: dict[str, AlbumType] = {}
 
     @cached
     def get_album(self, band_url: str, band_id: int, album_id: int, item_type: bc.ArtistDiscographyEntryType) -> Album:
@@ -63,7 +62,6 @@ class BandcampProvider(Provider):
             type_ = AlbumType.Streamable
         if album.free_download:
             type_ = AlbumType.Downloadable
-        self.status[album.url] = type_
         genres: list[str] = []
         for tag in album.tags:
             if not tag.is_location:
@@ -85,6 +83,7 @@ class BandcampProvider(Provider):
             genre=genres,
             upn=upc,
             provider=self,
+            extra_data={"type": type_},
         )
 
     def fetch(self, url: str) -> list[Album]:
@@ -113,7 +112,7 @@ class BandcampProvider(Provider):
         return [ARTIST_BANDCAMP]
 
     def url_types(self, album: Album) -> List[str]:
-        match self.status[album.url]:
+        match album.extra_data.get("type"):
             case AlbumType.Streamable:
                 return [RELEASE_FREE_STREAMING, RELEASE_PURCHASE_FOR_DOWNLOAD]
             case AlbumType.Downloadable:
