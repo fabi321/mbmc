@@ -67,6 +67,7 @@ class DiscogsProvider(Provider):
         self.set_total_items(len(artist.releases))
         for release in artist.releases:
             if isinstance(release, Master):
+                self.finish_item()
                 continue
             release = self.get_release(release.id)
             release.provider = self
