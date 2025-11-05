@@ -71,9 +71,9 @@ def get_releases(mb_id: str) -> list[dict]:
         )
         batch = result.get("release-list", [])
         releases.extend(batch)
-        if len(batch) < limit:
+        if len(releases) >= result["release-count"]:
             break
-        offset += limit
+        offset += len(batch)
 
     for release in releases:
         for url in release.get("url-relation-list", []):
