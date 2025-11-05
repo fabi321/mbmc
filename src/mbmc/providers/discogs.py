@@ -1,7 +1,7 @@
 from typing import List
 
 import discogs_client
-from discogs_client import Master
+from discogs_client import Master, Track as DCTrack, Release as DCRelease
 
 from mbmc.cache import cached
 from mbmc.constants import USER_AGENT
@@ -26,17 +26,9 @@ class DiscogsProvider(Provider):
         super().__init__("Discogs")
         self.client = discogs_client.Client(USER_AGENT)
 
-    @cached
-    def artist_id_to_credit(self, artist_id: int) -> tuple[str, str]:
-        if artist_id == 194:
-            return "Various", "https://www.discogs.com/artist/194"
-        if artist_id == 118760:
-            return "Unknown", "https://www.discogs.com/artist/118760"
-        artist = self.client.artist(artist_id)
-        return artist.name, normalize_url(artist.url)
-
-    def item_to_artist(self, item) -> List[tuple[str, str]]:
-        return [self.artist_id_to_credit(artist.id) for artist in item.artists]
+    @staticmethod
+    def item_to_artist(item: DCTrack | DCRelease) -> List[tuple[str, str]]:
+        return [(artist.name, f"https://www.discogs.com/artist/{artist.id}") for artist in item.artists]
 
     @cached
     def get_release(self, release_id: str) -> Album:
