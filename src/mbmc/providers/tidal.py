@@ -3,6 +3,7 @@ from typing import List
 
 import tidalapi
 
+from mbmc.cache import cached
 from mbmc.providers._mb_link_types import (
     ARTIST_STREAMING,
     RELEASE_STREAMING,
@@ -34,6 +35,7 @@ class TidalProvider(Provider):
             ]
         return item.artist.name
 
+    @cached
     def get_album(self, album_id: str) -> Album:
         album = self.session.album(album_id)
         tracks = [
