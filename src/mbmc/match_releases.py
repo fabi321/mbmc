@@ -155,7 +155,7 @@ def inner_extract_featured(
     else:
         extracted = artist
     if "feat." in name.lower() or "ft." in name.lower():
-        main_artist, featured_part = re.split(r"f(?:ea)?t\.", name, flags=re.IGNORECASE)
+        main_artist, featured_part = re.split(r"f(?:ea)?t\.", name, flags=re.IGNORECASE, maxsplit=1)
         if main_artist.endswith("("):
             main_artist = main_artist[:-1].strip()
             featured_part = featured_part.replace(")", "", 1).strip()
