@@ -365,6 +365,9 @@ def to_mb_release(albums: list[Album], app: CollectorApp) -> Optional[dict[str, 
         result["events.0.date.month"] = month
         result["events.0.date.day"] = day
     result["events.0.country"] = "XW"
+    if len(albums) == 1:
+        # Disambiguation field, used for single provider releases
+        result["comment"] = albums[0].provider.name
     edit_note: str = ""
     for album in albums:
         edit_note += f"Sourced from {album.url}\n"
