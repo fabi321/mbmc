@@ -49,7 +49,6 @@ def main() -> int:
     relevant_banned = BANNED_ALBUMS.setdefault(MB_ID, [])
 
     providers = get_providers(MB_ID, queue, args.banned_urls, existing_urls + relevant_banned)
-    print(providers)
     mb_provider = providers[-1]
     non_mb_providers = providers[:-1]
 
