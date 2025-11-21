@@ -44,21 +44,18 @@ def main() -> int:
     progress = Progress(queue)
     progress.start()
 
-    providers = get_providers(MB_ID, queue, args.banned_urls)
-    mb_provider = providers[-1]
-    non_mb_providers = providers[:-1]
+    existing_urls = find_missing_releases(MB_ID)
 
     relevant_banned = BANNED_ALBUMS.setdefault(MB_ID, [])
-    for provider in providers:
-        for album in provider.albums:
-            if album.url in relevant_banned:
-                album.status = album.status.BANNED
+
+    providers = get_providers(MB_ID, queue, args.banned_urls, existing_urls + relevant_banned)
+    print(providers)
+    mb_provider = providers[-1]
+    non_mb_providers = providers[:-1]
 
     queue.put(None)
     queue.join()
     progress.join()
-
-    find_missing_releases(MB_ID, providers)
 
     while True:
         for provider in non_mb_providers:

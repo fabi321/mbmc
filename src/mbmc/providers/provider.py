@@ -82,7 +82,7 @@ class Provider(ABC):
             self.message_queue.put(self.name)
 
     @abstractmethod
-    def fetch(self, url: str) -> list[Album]:
+    def fetch(self, url: str, ignore: list[str]) -> list[Album]:
         raise NotImplementedError
 
     @staticmethod

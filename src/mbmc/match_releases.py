@@ -43,7 +43,7 @@ PROVIDERS = [
 
 
 def get_providers(
-    mb_id: str, queue: Queue[str | tuple[str, int]], banned_urls: list[str]
+    mb_id: str, queue: Queue[str | tuple[str, int]], banned_urls: list[str], ignore: list[str]
 ) -> list[Provider]:
     artist = get_artist(mb_id)
     relevant_urls: list[str] = []
@@ -60,7 +60,7 @@ def get_providers(
 
     with ThreadPool(15) as pool:
         providers = pool.map(prefetch_provider, (
-            (provider_cls, links, queue)
+            (provider_cls, links, queue, ignore)
             for provider_cls, links in pairings.items()
             if links
         ))
@@ -71,19 +71,13 @@ def normalize_name(name: str) -> str:
     return name.lower().strip()
 
 
-def find_missing_releases(mb_id: str, providers: list[Provider]):
-    to_find: dict[str, Album] = {}
-    for provider in providers:
-        if isinstance(provider, MusicBrainzProvider):
-            continue
-        for album in provider.albums:
-            to_find[album.url] = album
-
+def find_missing_releases(mb_id: str) -> list[str]:
     releases = get_releases(mb_id)
+    result = []
     for album in releases:
         for url in album.get("url-relation-list", []):
-            if found := to_find.get(normalize_url(url["target"]), None):
-                found.status = AlbumStatus.COMPLETED
+            result.append(normalize_url(url["target"]))
+    return result
 
 
 def album_to_track_layout(album: Album) -> tuple[str, list[tuple[int, int]]]:

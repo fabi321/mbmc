@@ -51,13 +51,13 @@ def thumbnail_worker(items: tuple[Album, Queue]):
 
 
 def prefetch_provider(
-    input: tuple[type[Provider], set[str], Queue[str | tuple[str, int]]],
+    input: tuple[type[Provider], set[str], Queue[str | tuple[str, int]], list[str]],
 ) -> Provider:
-    provider_cls, links, queue = input
+    provider_cls, links, queue, ignore = input
     provider = provider_cls()
     provider.message_queue = queue
     for url in links:
-        provider.albums.extend(provider.fetch(url))
+        provider.albums.extend(provider.fetch(url, ignore))
     queue.put(("Thumbnails", len(provider.albums)))
     # Only one at a time for better success rates, and this is usually not a bottleneck
     for album in provider.albums:

@@ -57,7 +57,7 @@ class SpotifyProvider(Provider):
             provider=self,
         )
 
-    def fetch(self, url: str) -> list[Album]:
+    def fetch(self, url: str, ignore: list[str]) -> list[Album]:
         finalized: list[Album] = []
         last_response = self.client.artist_albums(url.split("/")[-1], limit=50)
         raw_items = last_response["items"]
@@ -66,6 +66,9 @@ class SpotifyProvider(Provider):
             raw_items.extend(last_response["items"])
         self.set_total_items(len(raw_items))
         for album in raw_items:
+            if normalize_url(album["external_urls"]["spotify"]) in ignore:
+                self.finish_item()
+                continue
             album = self.get_album(album["id"])
             album.provider = self
             for track in album.tracks:

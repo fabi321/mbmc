@@ -43,12 +43,15 @@ class DeezerProvider(Provider):
         )
 
 
-    def fetch(self, url: str) -> list[Album]:
+    def fetch(self, url: str, ignore: list[str]) -> list[Album]:
         artist = self.client.get_artist(int(url.split("/")[-1]))
         finalized: list[Album] = []
         raw_albums = list(artist.get_albums())
         self.set_total_items(len(raw_albums))
         for album in raw_albums:
+            if normalize_url(album.link) in ignore:
+                self.finish_item()
+                continue
             album = self.get_album(album.id)
             album.provider = self
             for track in album.tracks:

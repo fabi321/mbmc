@@ -124,7 +124,7 @@ class AppleMusicProvider(Provider):
             provider=self,
         )
 
-    def fetch(self, url: str) -> list[Album]:
+    def fetch(self, url: str, ignore: list[str]) -> list[Album]:
         artist = self.client.artist(url.split("/")[-1])
         artist: dict = artist["data"][0]
         albums = self.client.collect_items(artist["views"]["full-albums"])
@@ -134,6 +134,9 @@ class AppleMusicProvider(Provider):
         finalized: list[Album] = []
         self.set_total_items(len(albums))
         for base_album in albums:
+            if normalize_url(base_album["url"]) in ignore:
+                self.finish_item()
+                continue
             album = self.get_album(base_album["url"].split("/")[-1])
             album.provider = self
             for track in album.tracks:

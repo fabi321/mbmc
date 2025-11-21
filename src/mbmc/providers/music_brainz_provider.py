@@ -23,7 +23,7 @@ class MusicBrainzProvider(Provider):
     def __init__(self):
         super().__init__("MusicBrainz")
 
-    def fetch(self, url: str) -> list[Album]:
+    def fetch(self, url: str, _ignore: list[str]) -> list[Album]:
         releases = get_releases(url.split("/")[-1])
         finalized: list[Album] = []
         self.set_total_items(len(releases))

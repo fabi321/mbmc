@@ -59,12 +59,15 @@ class TidalProvider(Provider):
             provider=self,
         )
 
-    def fetch(self, url: str) -> list[Album]:
+    def fetch(self, url: str, ignore: list[str]) -> list[Album]:
         artist = self.session.artist(url.split("/")[-1])
         finalized: list[Album] = []
         raw_albums = artist.get_albums() + artist.get_other() + artist.get_ep_singles()
         self.set_total_items(len(raw_albums))
         for album in raw_albums:
+            if f"https://tidal.com/album/{album.id}" in ignore:
+                self.finish_item()
+                continue
             album = self.get_album(str(album.id))
             album.provider = self
             for track in album.tracks:

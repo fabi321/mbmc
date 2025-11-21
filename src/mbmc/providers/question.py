@@ -7,7 +7,7 @@ from mbmc.providers.provider import Provider, Album, Track
 
 
 class Unfiltered(Provider, ABC):
-    def fetch(self, url: str) -> list[Album]:
+    def fetch(self, url: str, ignore: list[str]) -> list[Album]:
         return []
 
     def filter(self) -> list[Album]:

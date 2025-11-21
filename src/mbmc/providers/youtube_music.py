@@ -60,7 +60,7 @@ class YouTubeMusicProvider(Provider):
             provider=self,
         )
 
-    def fetch(self, url: str) -> list[Album]:
+    def fetch(self, url: str, ignore: list[str]) -> list[Album]:
         artist: types.Artist = self.client.get_artist(url.split("/")[-1])
         finalized: list[Album] = []
         albums = self.get_releases_for_artist(artist, "albums")
@@ -69,6 +69,9 @@ class YouTubeMusicProvider(Provider):
         self.set_total_items(len(all_releases))
         for base_album in all_releases:
             album = self.get_album(base_album["browseId"])
+            if album.url in ignore:
+                self.finish_item()
+                continue
             album.provider = self
             for track in album.tracks:
                 track.provider = self

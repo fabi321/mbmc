@@ -61,12 +61,15 @@ class DiscogsProvider(Provider):
             provider=self,
         )
 
-    def fetch(self, url: str) -> list[Album]:
+    def fetch(self, url: str, ignore: list[str]) -> list[Album]:
         artist = self.client.artist(url.split("/")[-1])
         finalized: list[Album] = []
         self.set_total_items(len(artist.releases))
         for release in artist.releases:
             if isinstance(release, Master):
+                self.finish_item()
+                continue
+            if normalize_url(release.url) in ignore:
                 self.finish_item()
                 continue
             release = self.get_release(release.id)

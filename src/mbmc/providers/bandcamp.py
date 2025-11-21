@@ -86,7 +86,7 @@ class BandcampProvider(Provider):
             extra_data={"type": type_},
         )
 
-    def fetch(self, url: str) -> list[Album]:
+    def fetch(self, url: str, ignore: list[str]) -> list[Album]:
         artist: bc.Artist = bc.artist_from_url_sync(url)
         finalized: list[Album] = []
         self.set_total_items(len(artist.discography))
@@ -97,6 +97,9 @@ class BandcampProvider(Provider):
                 album_id=album_entry.id,
                 item_type=album_entry.item_type,
             )
+            if album.url in ignore:
+                self.finish_item()
+                continue
             album.provider = self
             for track in album.tracks:
                 track.provider = self

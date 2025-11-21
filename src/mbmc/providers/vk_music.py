@@ -65,13 +65,16 @@ class VkMusicProvider(Provider):
                 result.append((child.text, child["href"]))
         return result
 
-    def fetch(self, url: str) -> list[Album]:
+    def fetch(self, url: str, ignore: list[str]) -> list[Album]:
         artist_name: str = url.split("/")[-1]
         albums = get_data(artist_name, "albums")
         albums.extend(get_data(artist_name, "singles"))
         finalized: list[Album] = []
         self.set_total_items(len(albums))
         for album in albums:
+            if f"https://vk.com/music/album/{album['ownerId']}_{album['id']}" in ignore:
+                self.finish_item()
+                continue
             finalized.append(
                 Album(
                     title=album["title"],
