@@ -124,7 +124,7 @@ class Provider(ABC):
     def ignore_album(self, album: str) -> None:
         album = album.lower().strip()
         for a in self.albums:
-            if a.title.lower().strip() == album:
+            if a.status == AlbumStatus.TODO and a.title.lower().strip() == album:
                 a.status = AlbumStatus.IGNORED
 
     @staticmethod
