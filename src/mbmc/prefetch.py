@@ -1,4 +1,5 @@
 import io
+import traceback
 import urllib.request
 from queue import Queue
 from typing import Optional
@@ -56,12 +57,16 @@ def prefetch_provider(
     provider_cls, links, queue, ignore = input
     provider = provider_cls()
     provider.message_queue = queue
-    for url in links:
-        provider.albums.extend(provider.fetch(url, ignore))
-    queue.put(("Thumbnails", len(provider.albums)))
-    # Only one at a time for better success rates, and this is usually not a bottleneck
-    for album in provider.albums:
-        if album.thumbnail is not None:
-            album.thumbnail = load_thumbnail(album.thumbnail)
-        queue.put("Thumbnails")
+    try:
+        for url in links:
+            provider.albums.extend(provider.fetch(url, ignore))
+        queue.put(("Thumbnails", len(provider.albums)))
+        # Only one at a time for better success rates, and this is usually not a bottleneck
+        for album in provider.albums:
+            if album.thumbnail is not None:
+                album.thumbnail = load_thumbnail(album.thumbnail)
+            queue.put("Thumbnails")
+    except:
+        traceback.print_exc()
+        print("\n")
     return provider
