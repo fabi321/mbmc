@@ -28,6 +28,9 @@ class MusicBrainzProvider(Provider):
         finalized: list[Album] = []
         self.set_total_items(len(releases))
         for release in releases:
+            if not release.get("medium-list"):
+                self.finish_item()
+                continue
             tracks = [
                 Track(
                     title=track["recording"]["title"],
