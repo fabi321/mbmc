@@ -147,7 +147,7 @@ def inner_extract_featured(
     if isinstance(artist, str):
         extracted = [artist]
     else:
-        extracted = artist
+        extracted = artist.copy()
     if "feat." in name.lower() or "ft." in name.lower():
         main_artist, featured_part = re.split(r"f(?:ea)?t\.", name, flags=re.IGNORECASE, maxsplit=1)
         if main_artist.endswith("("):
