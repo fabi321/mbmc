@@ -19,7 +19,7 @@ class Track:
     provider: Provider
     title: str
     artist: ArtistFormat
-    duration: int
+    duration: Optional[int]
     """duration in milliseconds"""
     track_nr: int
     disk_nr: int = 1

@@ -117,7 +117,9 @@ def album_to_track_layout(album: Album) -> tuple[str, list[tuple[int, int]]]:
 def album_to_track_length(album: Album) -> tuple[str, list[int]]:
     lengths = [track.duration for track in album.tracks]
 
-    def format_length(ms: int) -> str:
+    def format_length(ms: Optional[int]) -> str:
+        if ms is None:
+            return "?:??"
         seconds = ms // 1000
         minutes = seconds // 60
         seconds = seconds % 60
@@ -335,7 +337,8 @@ def to_mb_release(albums: list[Album], app: CollectorApp) -> Optional[dict[str, 
         )
         result[f"{mb_name}.name"] = name
         result[f"{mb_name}.number"] = str(track_id)
-        result[f"{mb_name}.length"] = str(track_lengths[i])
+        if track_lengths[i] is not None:
+            result[f"{mb_name}.length"] = str(track_lengths[i])
         result.update(artist_credit_to_mb_format(artist, f"{mb_name}.artist_credit"))
     counter = 0
     for album in albums:

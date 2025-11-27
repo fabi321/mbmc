@@ -95,7 +95,7 @@ class AppleMusicProvider(Provider):
             Track(
                 title=track["attributes"]["name"],
                 artist=AppleMusicProvider.item_to_artist(track, resources),
-                duration=track["attributes"]["durationInMillis"],
+                duration=track["attributes"].get("durationInMillis"),
                 track_nr=track["attributes"]["trackNumber"],
                 disk_nr=track["attributes"].get("discNumber", 1),
                 provider=self,

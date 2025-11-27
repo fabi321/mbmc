@@ -47,7 +47,7 @@ class BandcampProvider(Provider):
             Track(
                 title=track.title,
                 artist=artist_name,
-                duration=int(track.duration * 1000),
+                duration=int(track.duration * 1000) if track.duration is not None else None,
                 track_nr=track.track_number or 1,  # Singles have no track number
                 provider=self,
             )
