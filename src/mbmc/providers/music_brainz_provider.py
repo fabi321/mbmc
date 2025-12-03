@@ -37,9 +37,10 @@ class MusicBrainzProvider(Provider):
                     artist=track["recording"]["artist-credit-phrase"],
                     duration=int(track.get("length", 0)),
                     track_nr=int(track["position"]),
+                    disk_nr=int(medium["position"]),
                     provider=self,
                 )
-                for track in release["medium-list"][0]["track-list"]
+                for medium in release["medium-list"] for track in medium["track-list"]
             ]
             thumbnail = get_cover_art(release["id"])
             extra_info: Optional[str] = None
