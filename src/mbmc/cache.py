@@ -7,7 +7,7 @@ import inspect
 
 from mbmc.util import CACHE_DIR
 
-CACHE_FILE: Path = CACHE_DIR / " cache.db"
+CACHE_FILE: Path = CACHE_DIR / "cache.db"
 
 local = threading.local()
 
