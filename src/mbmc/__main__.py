@@ -1,6 +1,7 @@
 import sys
 from argparse import ArgumentParser
 from queue import Queue
+from time import sleep
 
 import dotenv
 
@@ -95,7 +96,7 @@ def main() -> int:
             for provider in non_mb_providers:
                 provider.ignore_album(current)
 
-    input("Press Enter to continue...")
+    sleep(1)
     # when done with GUI:
     app.destroy()
 
