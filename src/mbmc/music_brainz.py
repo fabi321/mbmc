@@ -49,15 +49,15 @@ def find_url(url: str) -> Optional[str]:
     return target
 
 
-@cache
-def get_releases(mb_id: str) -> list[dict]:
+def inner_get_releases(mb_id: str, various_artists: bool) -> list[dict]:
     releases = []
     limit = 100
     offset = 0
+    extra = {"track_artist": mb_id} if various_artists else {"artist": mb_id}
 
     while True:
         result = mb.browse_releases(
-            track_artist=mb_id,
+            **extra,
             includes=[
                 "recordings",
                 "url-rels",
@@ -74,11 +74,13 @@ def get_releases(mb_id: str) -> list[dict]:
         if len(releases) >= result["release-count"]:
             break
         offset += len(batch)
+    return releases
 
-    for release in releases:
-        for url in release.get("url-relation-list", []):
-            MATCHED_URLS[normalize_url(url["target"])] = release["id"]
 
+@cache
+def get_releases(mb_id: str) -> list[dict]:
+    releases = inner_get_releases(mb_id, various_artists=False)
+    releases.extend(inner_get_releases(mb_id, various_artists=True))
     return releases
 
 
