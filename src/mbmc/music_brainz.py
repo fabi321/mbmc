@@ -57,7 +57,7 @@ def get_releases(mb_id: str) -> list[dict]:
 
     while True:
         result = mb.browse_releases(
-            mb_id,
+            track_artist=mb_id,
             includes=[
                 "recordings",
                 "url-rels",
