@@ -81,6 +81,11 @@ def inner_get_releases(mb_id: str, various_artists: bool) -> list[dict]:
 def get_releases(mb_id: str) -> list[dict]:
     releases = inner_get_releases(mb_id, various_artists=False)
     releases.extend(inner_get_releases(mb_id, various_artists=True))
+
+    for release in releases:
+        for url in release.get("url-relation-list", []):
+            MATCHED_URLS[normalize_url(url["target"])] = release["id"]
+
     return releases
 
 
