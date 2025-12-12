@@ -48,7 +48,7 @@ def get_providers(
     artist = get_artist(mb_id)
     relevant_urls: list[str] = []
     for url in artist.get("url-relation-list", []):
-        if url["target"] not in banned_urls:
+        if url["target"] not in banned_urls and url.get("ended", "false") != "true":
             relevant_urls.append(url["target"])
     relevant_urls.append(f"https://musicbrainz.org/artist/{mb_id}")
     pairings: dict[type[Provider], set[str]] = {cls: set() for cls in PROVIDERS}
