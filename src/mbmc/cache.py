@@ -44,18 +44,26 @@ def cached(func: T) -> T:
             input_value = repr(args[1:]) + repr(kwargs)  # skip 'self' or 'cls'
         else:
             input_value = repr(args) + repr(kwargs)
-        cursor = local.cache.execute(
-            "select rowid, value from cache where name = ? and input_value = ?",
-            (name, input_value),
-        )
-        row = cursor.fetchone()
-        if row:
-            local.cache.execute(
-                "update cache set last_access = unixepoch() where rowid = ?",
-                (row[0],),
-            )
-            local.cache.commit()
-            return pickle.loads(row[1])
+        retries: int = 0
+        while True:
+            try:
+                cursor = local.cache.execute(
+                    "select rowid, value from cache where name = ? and input_value = ?",
+                    (name, input_value),
+                )
+                row = cursor.fetchone()
+                if row:
+                    local.cache.execute(
+                        "update cache set last_access = unixepoch() where rowid = ?",
+                        (row[0],),
+                    )
+                    local.cache.commit()
+                    return pickle.loads(row[1])
+            except sqlite3.OperationalError:
+                retries += 1
+                if retries > 10:
+                    raise RuntimeError("Could not connect to cache")
+            break
         result = func(*args, **kwargs)
         local.cache.execute(
             "insert into cache (name, input_value, value) values (?, ?, ?)",
