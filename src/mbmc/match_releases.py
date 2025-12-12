@@ -31,12 +31,12 @@ from mbmc.providers.youtube_music import YouTubeMusicProvider
 PROVIDERS = [
     BandcampProvider,
     SpotifyProvider,
-    DeezerProvider,
-    TidalProvider,
     AppleMusicProvider,
+    VkMusicProvider,
     YouTubeMusicProvider,
     # MetalArchivesProvider, !! broken tue to cf
-    VkMusicProvider,
+    DeezerProvider,
+    TidalProvider,
     DiscogsProvider,
     MusicBrainzProvider,
 ]
