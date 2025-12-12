@@ -75,15 +75,15 @@ PREVIOUS_MAPPINGS: dict[tuple[str, ...], str] = {}
 def pick_reduction_option(
     title: str,
     albums: list[V],
-    reduction_function: Callable[[V], tuple[str, T]],
+    reduction_function: Callable[[V], tuple[str, T, int]],
     app: CollectorApp,
 ) -> Optional[T]:
-    mapping: dict[str, tuple[T, list[str]]] = {}
+    mapping: dict[str, tuple[T, list[str], int]] = {}
     for album in albums:
-        prompt, value = reduction_function(album)
+        prompt, value, group = reduction_function(album)
         if not prompt:
             continue
-        mapping.setdefault(prompt, (value, []))[1].append(album.provider.name)
+        mapping.setdefault(prompt, (value, [], group))[1].append(album.provider.name)
     if len(mapping) == 0:
         return ""
     if len(mapping) == 1:
@@ -97,8 +97,8 @@ def pick_reduction_option(
             prompt=f"{prompt} ({len(providers)})",
             snippet=", ".join(providers),
         )
-        for prompt, (_, providers) in sorted(
-            mapping.items(), key=lambda x: len(x[1][1]), reverse=True
+        for prompt, (_, providers, _) in sorted(
+            mapping.items(), key=lambda x: (x[1][2], len(x[1][1])), reverse=True
         )
     ]
     selection = ask_question(title, options, app)

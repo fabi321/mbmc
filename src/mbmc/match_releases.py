@@ -80,7 +80,7 @@ def find_missing_releases(mb_id: str) -> list[str]:
     return result
 
 
-def album_to_track_layout(album: Album) -> tuple[str, list[tuple[int, int]]]:
+def album_to_track_layout(album: Album) -> tuple[str, list[tuple[int, int]], int]:
     tracks = [(track.disk_nr, track.track_nr) for track in album.tracks]
     # combine disk layout into single string for easy comparison
     # e.g. "Disk 1: 1-5, Disk 2: 1-4"
@@ -111,10 +111,10 @@ def album_to_track_layout(album: Album) -> tuple[str, list[tuple[int, int]]]:
                 push_range(disk_nr, track_nr)
     push_range()
     layout_str = "".join(layout).removesuffix(", ")
-    return layout_str, tracks
+    return layout_str, tracks, 0
 
 
-def album_to_track_length(album: Album) -> tuple[str, list[int]]:
+def album_to_track_length(album: Album) -> tuple[str, list[int], int]:
     lengths = [track.duration for track in album.tracks]
 
     def format_length(ms: Optional[int]) -> str:
@@ -129,17 +129,25 @@ def album_to_track_length(album: Album) -> tuple[str, list[int]]:
         return tmp
 
     length_str = ", ".join(format_length(length) for length in lengths)
-    return length_str, lengths
+    score = 0
+    if "." in length_str:
+        score = 1
+    if "0:00" in length_str:
+        score = -1
+    if "?:??" in length_str:
+        score = -2
+
+    return length_str, lengths, score
 
 
-def album_to_title(album: Album) -> tuple[str, str]:
-    return album.title, album.title
+def album_to_title(album: Album) -> tuple[str, str, int]:
+    return album.title, album.title, 0
 
 
-def album_to_track_title(album: Album) -> tuple[str, list[str]]:
+def album_to_track_title(album: Album) -> tuple[str, list[str], int]:
     titles = [track.title for track in album.tracks]
     title_str = ", ".join(titles)
-    return title_str, titles
+    return title_str, titles, 0
 
 
 def inner_extract_featured(
@@ -182,15 +190,18 @@ def extract_featured(album: Album):
 
 def album_to_album_artist(
     album: Album | Track,
-) -> tuple[str, list[str | tuple[str, str]]]:
+) -> tuple[str, list[str | tuple[str, str]], int]:
     artist = album.artist
     artist_list: list[str | tuple[str, Optional[str]]]
     assert not isinstance(artist, str)
     artist_list = []
     # Automatically add ", " between artist entries, if the source didn't provide it
     has_join_phrase: bool = True
+    matched_count = 0
+    unmatched_count = 0
     for entry in artist:
         if isinstance(entry, str):
+            unmatched_count += 1
             if has_join_phrase:
                 artist_list.append((entry, None))
             else:
@@ -198,7 +209,9 @@ def album_to_album_artist(
             has_join_phrase = not has_join_phrase
         else:
             if not has_join_phrase:
+                unmatched_count += 1
                 artist_list.append(", ")
+            matched_count += 1
             artist_list.append((entry[0], find_url(entry[1])))
             has_join_phrase = False
     artist_str = "".join(
@@ -209,16 +222,24 @@ def album_to_album_artist(
         )
         for artist in artist_list
     )
-    return artist_str, artist_list
+    # Higher priority if artist credit contains more items (as that is likely more correct)
+    # Also give credits that have been matched a higher priority
+    return artist_str, artist_list, matched_count * 2 + unmatched_count
 
 
-def album_to_release_date(album: Album) -> tuple[str, str]:
-    return album.release_date, album.release_date
+def album_to_release_date(album: Album) -> tuple[str, str, int]:
+    score = 0
+    if "-01" in album.release_date:
+        score = 1
+    elif "-" in album.release_date:
+        score = 2
+    return album.release_date, album.release_date, score
 
 
-def album_to_barcode(album: Album) -> tuple[str, str]:
+def album_to_barcode(album: Album) -> tuple[str, str, int]:
     barcode = str(album.upn or "")
-    return barcode, barcode
+    # If a barcode starts with 0, it is more likely to be correct, as some platforms omit the leading zero
+    return barcode, barcode, int(barcode.startswith("0"))
 
 
 def artist_credit_to_mb_format(artist: ArtistFormat, prefix: str) -> dict[str, str]:
