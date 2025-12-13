@@ -199,10 +199,13 @@ def album_to_album_artist(
     has_join_phrase: bool = True
     matched_count = 0
     unmatched_count = 0
+    not_titlecase = 0
     for entry in artist:
         if isinstance(entry, str):
             unmatched_count += 1
             if has_join_phrase:
+                if not entry.istitle():
+                    not_titlecase += 1
                 artist_list.append((entry, None))
             else:
                 artist_list.append(entry)
@@ -212,6 +215,8 @@ def album_to_album_artist(
                 unmatched_count += 1
                 artist_list.append(", ")
             matched_count += 1
+            if not entry[0].istitle():
+                not_titlecase += 1
             artist_list.append((entry[0], find_url(entry[1])))
             has_join_phrase = False
     artist_str = "".join(
@@ -224,7 +229,8 @@ def album_to_album_artist(
     )
     # Higher priority if artist credit contains more items (as that is likely more correct)
     # Also give credits that have been matched a higher priority
-    return artist_str, artist_list, matched_count * 2 + unmatched_count
+    # Also penalize entries that are titlecase, as streaming service like to titlecase non-titlecase artists
+    return artist_str, artist_list, matched_count * 2 + unmatched_count + not_titlecase
 
 
 def album_to_release_date(album: Album) -> tuple[str, str, int]:
