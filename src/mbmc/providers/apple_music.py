@@ -67,7 +67,7 @@ class PatchedAppleMusicClient(applemusicpy.AppleMusic):
         )
 
     def collect_items(self, item) -> list:
-        results = [i["attributes"] for i in item["data"]]
+        results = [i["attributes"] for i in item["data"] if "attributes" in i]
         current_item: dict = item
         while "next" in current_item:
             current_item = self._get(self.root.rsplit("/", 2)[0] + current_item["next"])
