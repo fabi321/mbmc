@@ -24,7 +24,7 @@ def get_api_key() -> str:
     assert len(results) == 1
     script_url = results[0]["src"]
     script = requests.get(f"https://music.apple.com{script_url}").text
-    match = re.search(r'const\s+[a-z]+\s*=\s*"(ey.+?)"', script)
+    match = re.search(r'const\s+[a-zA-Z]+\s*=\s*"(ey.+?)"', script)
     assert match is not None
     return match.group(1)
 
