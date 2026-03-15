@@ -59,7 +59,7 @@ class SpotifyProvider(Provider):
 
     def fetch(self, url: str, ignore: list[str]) -> list[Album]:
         finalized: list[Album] = []
-        last_response = self.client.artist_albums(url.split("/")[-1], limit=50)
+        last_response = self.client.artist_albums(url.split("/")[-1], limit=10)
         raw_items = last_response["items"]
         while last_response["next"]:
             last_response = self.client.next(last_response)
