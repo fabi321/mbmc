@@ -1,3 +1,4 @@
+from time import sleep
 from typing import List
 
 from deezer import Client
@@ -19,6 +20,7 @@ class DeezerProvider(Provider):
     @cached
     def get_album(self, album_id: str) -> Album:
         album = self.client.get_album(int(album_id))
+        sleep(0.25)  # Avoid hitting rate limits
         tracks = [
             Track(
                 title=track.title,
