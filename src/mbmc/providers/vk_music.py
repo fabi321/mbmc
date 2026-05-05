@@ -244,11 +244,11 @@ class VkMusicProvider(Provider):
             if duration:
                 duration *= 1000
             tracks.append(Track(
-                self,
-                track["title"],
-                vk_artist(track),
-                duration,
-                i + 1,
+                provider=self,
+                title=track["title"],
+                artist=vk_artist(track),
+                duration=duration,
+                track_nr=i + 1,
             ))
         thumbnail = None
         max_res = None
@@ -260,15 +260,14 @@ class VkMusicProvider(Provider):
                 max_res = size
                 thumbnail = value
         return Album(
-            self,
-            album_information["title"],
-            f"https://vk.com/music/album/{owner_id}_{playlist_id}",
-            vk_artist(album_information),
-            str(album_information["year"]),
-            tracks,
-            thumbnail,
-            [i["name"] for i in album_information["genres"]],
-            None,
+            provider=self,
+            title=album_information["title"],
+            url=f"https://vk.com/music/album/{owner_id}_{playlist_id}",
+            artist=vk_artist(album_information),
+            release_date=str(album_information["year"]),
+            tracks=tracks,
+            thumbnail=thumbnail,
+            genre=[i["name"] for i in album_information["genres"]],
         )
 
     def fetch(self, url: str, ignore: list[str]) -> list[Album]:
@@ -281,9 +280,11 @@ class VkMusicProvider(Provider):
             if f"https://vk.com/music/album/{album['ownerId']}_{album['id']}" in ignore:
                 self.finish_item()
                 continue
-            finalized.append(
-                self.get_album(str(album["ownerId"]), str(album["id"]), album["accessHash"])
-            )
+            album = self.get_album(str(album["ownerId"]), str(album["id"]), album["accessHash"])
+            album.provider = self
+            for track in album.tracks:
+                track.provider = self
+            finalized.append(album)
             """
             finalized.append(
                 Album(
