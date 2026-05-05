@@ -13,7 +13,7 @@ _form_template = """<!doctype html>
     <title>Submit</title>
 </head>
 <body>
-    <form action=https://musicbrainz.org/{action} method="post">\n
+    <form action=https://musicbrainz.org/{action}?skip_confirmation=1 method="post">\n
         {form_data}
         <input type="submit" value="Do submit">
     </form>
