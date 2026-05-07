@@ -1,8 +1,7 @@
 import hashlib
-import json
 import re
 from functools import cache
-from typing import TypedDict, List
+from typing import TypedDict, List, Literal
 from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
 
 import requests
@@ -18,16 +17,11 @@ from mbmc.cache import cached
 
 
 class Playlist(TypedDict):
-    ownerId: int
+    owner_id: int
     id: int
     title: str
     description: str
-    authorLine: str
-    """Name including hrefs"""
-    authorName: str
-    """Human readable name"""
-    coverUrl: str
-    accessHash: str
+    access_key: str
 
 
 @cache
@@ -119,44 +113,6 @@ def get_access_token() -> str:
     return content["data"]["access_token"]
 
 
-def get_data(artist_name: str, type_: str) -> list[Playlist]:
-    request = requests.get(
-        f"https://vk.com/artist/{artist_name}/{type_}",
-        headers={
-            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:143.0) Gecko/20100101 Firefox/143.0"
-        },
-        cookies=get_cookies(),
-    )
-    request.raise_for_status()
-    all_html = request.text
-    section_id = next(re.finditer(r'"sectionId":"([^"]*)"', all_html)).group(1)
-    request = requests.post(
-        f"https://vk.com/audio?act=load_catalog_section",
-        headers={
-            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:143.0) Gecko/20100101 Firefox/143.0",
-            "Content-Type": "application/x-www-form-urlencoded",
-        },
-        data={"al": "1", "section_id": section_id},
-        cookies=get_cookies(),
-    )
-    request.raise_for_status()
-    text = request.text.replace("<!--", "", 1)
-    return json.loads(text)["payload"][1][1]["playlists"]
-
-
-@cached
-def resolve_artist(domain: str) -> str:
-    response = requests.get(
-        f"https://vk.com/artist/{domain}",
-        headers={
-            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:143.0) Gecko/20100101 Firefox/143.0",
-        },
-        cookies=get_cookies(),
-    )
-    response.raise_for_status()
-    return response.url
-
-
 def vk_artist(obj: dict) -> ArtistFormat:
     result = []
     for artist in obj["main_artists"]:
@@ -170,6 +126,38 @@ def vk_artist(obj: dict) -> ArtistFormat:
             result.append(", ")
         result.pop()
     return result
+
+
+def api_call(path: str, data: dict) -> dict:
+    client_id, _ = get_oauth()
+    if "access_token" not in data:
+        data["access_token"] = get_access_token()
+    request = requests.post(
+        f"https://api.vk.com/method/{path}?v=5.276&client_id={client_id}",
+        headers={
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:143.0) Gecko/20100101 Firefox/143.0",
+            "Content-Type": "application/json",
+        },
+        data=data,
+        cookies=get_cookies(),
+    )
+    request.raise_for_status()
+    return request.json()["response"]
+
+
+@cached
+def resolve_artist(domain: str) -> str:
+    response = api_call(
+        "catalog.getAudioArtist",
+        {
+            "url": f"https://vk.com/artist/{domain}",
+            "need_blocks": "1",
+            "aritst_id": domain,
+            "ref": ""
+        }
+    )
+    result = response["artists"][0]["domain"]
+    return f"https://vk.com/artist/{result}"
 
 
 class VkMusicProvider(Provider):
@@ -189,57 +177,49 @@ class VkMusicProvider(Provider):
                 result.append((child.text, child["href"]))
         return result
 
+    def get_releases(
+        self,
+        artist_name: str,
+        type_: Literal["albums", "singles"]
+    ) -> list[Playlist]:
+        response = api_call(
+            "catalog.getAudioArtist",
+            {
+                "url": f"https://vk.com/artist/{artist_name}/{type_}",
+                "need_blocks": "1",
+                "artist_id": artist_name,
+                "ref": ""
+            }
+        )
+        return response["playlists"]
+
     @cached
     def get_album(self, owner_id: str, playlist_id: str, access_key: str) -> Album:
         client_id, _ = get_oauth()
-        request = requests.post(
-            f"https://api.vk.com/method/audio.getPlaylistById?v=5.276&client_id={client_id}",
-            headers={
-                "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:143.0) Gecko/20100101 Firefox/143.0",
-                "Content-Type": "application/json",
-            },
-            data={
+        album_information = api_call(
+            "audio.getPlaylistById",
+            {
                 "playlist_id": playlist_id,
                 "owner_id": owner_id,
                 "access_key": access_key,
-                "access_token": get_access_token(),
                 "extra_fields": "owner, duration",
             },
-            cookies=get_cookies(),
-        )
-        request.raise_for_status()
-        album_information = request.json()["response"]["playlist"]
-        request = requests.post(
-            f"https://api.vk.com/method/audio.getIdsBySource?v=5.276&client_id={client_id}",
-            headers={
-                "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:143.0) Gecko/20100101 Firefox/143.0",
-                "Content-Type": "application/json",
-            },
-            data={
+        )["playlist"]
+        audios = api_call(
+            "audio.getIdsBySource",
+            {
                 "entity_id": f"{owner_id}_{playlist_id}_{access_key}",
                 "source": "playlist",
                 "ref": "",
-                "access_token": get_access_token(),
             },
-            cookies=get_cookies(),
         )
-        request.raise_for_status()
-        audios = [i["audio_id"] for i in request.json()["response"]["audios"]]
-        request = requests.post(
-            f"https://api.vk.com/method/audio.getById?v=5.276&client_id={client_id}",
-            headers={
-                "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:143.0) Gecko/20100101 Firefox/143.0",
-                "Content-Type": "application/json",
-            },
-            data={
-                "audios": ",".join(audios),
-                "access_token": get_access_token(),
-            },
-            cookies=get_cookies(),
+        audios = [i["audio_id"] for i in audios["audios"]]
+        track_data = api_call(
+            "audio.getById",
+            {"audios": ",".join(audios)},
         )
-        request.raise_for_status()
         tracks = []
-        for i, track in enumerate(request.json()["response"]):
+        for i, track in enumerate(track_data):
             duration = track.get("duration", None)
             if duration:
                 duration *= 1000
@@ -272,15 +252,15 @@ class VkMusicProvider(Provider):
 
     def fetch(self, url: str, ignore: list[str]) -> list[Album]:
         artist_name: str = url.split("/")[-1]
-        albums = get_data(artist_name, "albums")
-        albums.extend(get_data(artist_name, "singles"))
+        albums = self.get_releases(artist_name, "albums")
+        albums.extend(self.get_releases(artist_name, "singles"))
         finalized: list[Album] = []
         self.set_total_items(len(albums))
         for album in albums:
-            if f"https://vk.com/music/album/{album['ownerId']}_{album['id']}" in ignore:
+            if f"https://vk.com/music/album/{album['owner_id']}_{album['id']}" in ignore:
                 self.finish_item()
                 continue
-            album = self.get_album(str(album["ownerId"]), str(album["id"]), album["accessHash"])
+            album = self.get_album(str(album["owner_id"]), str(album["id"]), album["access_key"])
             album.provider = self
             for track in album.tracks:
                 track.provider = self
