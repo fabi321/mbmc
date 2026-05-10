@@ -191,6 +191,8 @@ class VkMusicProvider(Provider):
                 "ref": ""
             }
         )
+        if "playlists" not in response:
+            return []
         return response["playlists"]
 
     @cached
