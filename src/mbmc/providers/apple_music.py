@@ -1,4 +1,6 @@
+import base64
 import datetime
+import json
 import re
 from functools import cache
 from typing import List
@@ -24,20 +26,30 @@ def get_api_key() -> str:
     assert len(results) == 1
     script_url = results[0]["src"]
     script = requests.get(f"https://music.apple.com{script_url}").text
-    match = re.search(r'const\s+[a-zA-Z]+\s*=\s*"(ey.+?)"', script)
-    assert match is not None
-    return match.group(1)
+    for match in re.finditer(r'[a-zA-Z]+\s*=\s*"(ey.+?)"', script):
+        jwt = match.group(1)
+        cap = jwt.split(".")[1]
+        while len(cap) % 4 != 0:
+            cap += "="
+        capabilities = json.loads(base64.b64decode(cap, validate=False).decode("utf-8"))
+        if capabilities["iss"] == "AMPWebPlay":
+            return jwt
+    raise RuntimeError("Could not find AMPWebPlay JWT in script")
 
 
 class PatchedAppleMusicClient(applemusicpy.AppleMusic):
+    def __init__(self):
+        super().__init__("x", "y", "z")
+        self.root = "https://amp-api.music.apple.com/v1/"
+
     def generate_token(self, session_length):
         self.token_valid_until = datetime.datetime.now() + datetime.timedelta(
             hours=session_length
         )
         self.token_str = get_api_key()
+        print(self.token_str)
 
     def _auth_headers(self):
-        self.root = "https://amp-api.music.apple.com/v1/"
         headers = super()._auth_headers()
         headers["Origin"] = "https://music.apple.com"
         return headers
@@ -78,7 +90,7 @@ class PatchedAppleMusicClient(applemusicpy.AppleMusic):
 class AppleMusicProvider(Provider):
     def __init__(self):
         super().__init__("Apple Music")
-        self.client = PatchedAppleMusicClient("x", "y", "z")
+        self.client = PatchedAppleMusicClient()
 
     @staticmethod
     def item_to_artist(item: dict, root: dict) -> ArtistFormat:
