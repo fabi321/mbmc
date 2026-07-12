@@ -47,7 +47,6 @@ class PatchedAppleMusicClient(applemusicpy.AppleMusic):
             hours=session_length
         )
         self.token_str = get_api_key()
-        print(self.token_str)
 
     def _auth_headers(self):
         headers = super()._auth_headers()
