@@ -451,7 +451,7 @@ def merge_mb_release(albums: list[Album], app: CollectorApp) -> Optional[tuple[s
         result["events.0.date.year"] = year
         result["events.0.date.month"] = month
         result["events.0.date.day"] = day
-    result["events.0.country"] = mb_release.extra_data["release_country"] or "XW"
+    result["events.0.country"] = "XW"
     edit_note: str = ""
     for album in albums:
         edit_note += f"Sourced from {album.url}\n"
