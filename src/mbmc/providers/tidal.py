@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import List
 
 import tidalapi
+from tidalapi.exceptions import ObjectNotFound
 
 from mbmc.cache import cached
 from mbmc.providers._mb_link_types import (
@@ -60,7 +61,10 @@ class TidalProvider(Provider):
         )
 
     def fetch(self, url: str, ignore: list[str]) -> list[Album]:
-        artist = self.session.artist(url.split("/")[-1])
+        try:
+            artist = self.session.artist(url.split("/")[-1])
+        except ObjectNotFound:
+            return []
         finalized: list[Album] = []
         raw_albums = artist.get_albums() + artist.get_other() + artist.get_ep_singles()
         self.set_total_items(len(raw_albums))
