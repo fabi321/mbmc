@@ -116,7 +116,7 @@ def get_access_token() -> str:
 def vk_artist(obj: dict) -> ArtistFormat:
     result = []
     for artist in obj["main_artists"]:
-        result.append((artist["name"], resolve_artist(artist["domain"])))
+        result.append((Provider._(artist["name"]), resolve_artist(artist["domain"])))
         result.append(", ")
     result.pop()
     if "featured_artists" in obj:
@@ -163,19 +163,6 @@ def resolve_artist(domain: str) -> str:
 class VkMusicProvider(Provider):
     def __init__(self):
         super().__init__("VK Music")
-
-    @staticmethod
-    def author_line_to_artist(author_line: str) -> ArtistFormat:
-        result = []
-        soup = BeautifulSoup(author_line, "html.parser")
-        for child in soup.children:
-            if isinstance(child, str):
-                result.append(child)
-            else:
-                assert isinstance(child, Tag)
-                assert child.name == "a"
-                result.append((child.text, child["href"]))
-        return result
 
     def get_releases(
         self,
@@ -227,7 +214,7 @@ class VkMusicProvider(Provider):
                 duration *= 1000
             tracks.append(Track(
                 provider=self,
-                title=track["title"],
+                title=self._(track["title"]),
                 artist=vk_artist(track),
                 duration=duration,
                 track_nr=i + 1,
@@ -243,7 +230,7 @@ class VkMusicProvider(Provider):
                 thumbnail = value
         return Album(
             provider=self,
-            title=album_information["title"],
+            title=self._(album_information["title"]),
             url=f"https://vk.com/music/album/{owner_id}_{playlist_id}",
             artist=vk_artist(album_information),
             release_date=str(album_information["year"]),
@@ -267,19 +254,6 @@ class VkMusicProvider(Provider):
             for track in album.tracks:
                 track.provider = self
             finalized.append(album)
-            """
-            finalized.append(
-                Album(
-                    title=album["title"],
-                    artist=VkMusicProvider.author_line_to_artist(album["authorLine"]),
-                    release_date="",
-                    tracks=[],
-                    url=f"https://vk.com/music/album/{album['ownerId']}_{album['id']}",
-                    thumbnail=album["coverUrl"],
-                    provider=self,
-                )
-            )
-            """
             self.finish_item()
         return finalized
 

@@ -1,4 +1,5 @@
 from __future__ import annotations
+import unicodedata
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
@@ -94,6 +95,10 @@ class Provider(ABC):
         except LanguageDetectionError:
             pass
         return album.lower()
+
+    @staticmethod
+    def _(input: str) -> str:
+        return unicodedata.normalize("NFC", input)
 
     def filter(self) -> list[Album]:
         """Determine if this provider should be used based on available data."""

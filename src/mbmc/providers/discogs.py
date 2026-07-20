@@ -28,7 +28,7 @@ class DiscogsProvider(Provider):
 
     @staticmethod
     def item_to_artist(item: DCTrack | DCRelease) -> List[tuple[str, str]]:
-        return [(artist.name, f"https://www.discogs.com/artist/{artist.id}") for artist in item.artists]
+        return [(Provider._(artist.name), f"https://www.discogs.com/artist/{artist.id}") for artist in item.artists]
 
     @cached
     def get_release(self, release_id: str) -> Album:
@@ -43,7 +43,7 @@ class DiscogsProvider(Provider):
             duration = minutes_to_milliseconds(track.duration or "0:00")
             tracks.append(
                 Track(
-                    title=track.title,
+                    title=self._(track.title),
                     artist=self.item_to_artist(track),
                     duration=duration,
                     track_nr=track_nr,
@@ -51,7 +51,7 @@ class DiscogsProvider(Provider):
                 )
             )
         return Album(
-            title=release.title,
+            title=self._(release.title),
             artist=self.item_to_artist(release),
             release_date=str(release.year) if release.year else "Unknown",
             tracks=tracks,

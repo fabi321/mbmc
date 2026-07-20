@@ -27,7 +27,7 @@ class SpotifyProvider(Provider):
     @staticmethod
     def item_to_artist(item: dict) -> ArtistFormat:
         return list(
-            (artist["name"], normalize_url(artist["external_urls"]["spotify"]))
+            (Provider._(artist["name"]), normalize_url(artist["external_urls"]["spotify"]))
             for artist in item["artists"]
         )
 
@@ -36,7 +36,7 @@ class SpotifyProvider(Provider):
         album = self.client.album(album_id)
         tracks = [
             Track(
-                title=track["name"],
+                title=self._(track["name"]),
                 artist=SpotifyProvider.item_to_artist(track),
                 duration=track["duration_ms"],
                 track_nr=track["track_number"],
@@ -47,7 +47,7 @@ class SpotifyProvider(Provider):
         ]
         album = self.client.album(album["id"])
         return Album(
-            title=album["name"],
+            title=self._(album["name"]),
             artist=SpotifyProvider.item_to_artist(album),
             release_date=album["release_date"],
             tracks=tracks,

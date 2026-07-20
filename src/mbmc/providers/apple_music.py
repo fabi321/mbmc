@@ -96,7 +96,7 @@ class AppleMusicProvider(Provider):
         artists = []
         for artist in item["relationships"]["artists"]["data"]:
             artist = root["artists"][artist["id"]]["attributes"]
-            artists.append((artist["name"], normalize_url(artist["url"])))
+            artists.append((Provider._(artist["name"]), normalize_url(artist["url"])))
         return artists
 
     @cached
@@ -104,7 +104,7 @@ class AppleMusicProvider(Provider):
         resources = self.client.album(album_id)["resources"]
         tracks = [
             Track(
-                title=track["attributes"]["name"],
+                title=self._(track["attributes"]["name"]),
                 artist=AppleMusicProvider.item_to_artist(track, resources),
                 duration=track["attributes"].get("durationInMillis"),
                 track_nr=track["attributes"]["trackNumber"],
@@ -120,9 +120,9 @@ class AppleMusicProvider(Provider):
         if "music" in genres:
             genres.remove("music")
         return Album(
-            title=album["attributes"]["name"]
-            .replace(" - EP", "")
-            .replace(" - Single", ""),
+            title=self._(album["attributes"]["name"]
+                         .replace(" - EP", "")
+                         .replace(" - Single", "")),
             artist=AppleMusicProvider.item_to_artist(album, resources),
             release_date=album["attributes"]["releaseDate"],
             tracks=tracks,

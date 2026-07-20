@@ -33,7 +33,7 @@ class YouTubeMusicProvider(Provider):
     @staticmethod
     def item_to_artist(item: types.Album | types.Track) -> ArtistFormat:
         return [
-            (artist["name"], f'https://music.youtube.com/channel/{artist["id"]}')
+            (Provider._(artist["name"]), f'https://music.youtube.com/channel/{artist["id"]}')
             for artist in item["artists"]
         ]
 
@@ -42,7 +42,7 @@ class YouTubeMusicProvider(Provider):
         album: types.Album = self.client.get_album(browse_id)
         tracks = [
             Track(
-                title=track["title"],
+                title=self._(track["title"]),
                 artist=YouTubeMusicProvider.item_to_artist(track),
                 duration=int(track["duration_seconds"] * 1000),
                 track_nr=track["trackNumber"],
@@ -51,7 +51,7 @@ class YouTubeMusicProvider(Provider):
             for track in album["tracks"]
         ]
         return Album(
-            title=album["title"],
+            title=self._(album["title"]),
             artist=YouTubeMusicProvider.item_to_artist(album),
             release_date=album.get("year", "Unknown"),
             tracks=tracks,

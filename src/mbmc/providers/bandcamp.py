@@ -34,7 +34,7 @@ class BandcampProvider(Provider):
             album = bc.fetch_track_sync(band_id, album_id)
         artist_name = [
             (
-                name.strip(),
+                self._(name.strip()),
                 (
                     normalize_url(band_url)
                     if name.strip().lower() in album.band.name.lower()
@@ -45,7 +45,7 @@ class BandcampProvider(Provider):
         ]
         tracks = [
             Track(
-                title=track.title,
+                title=self._(track.title),
                 artist=artist_name,
                 duration=int(track.duration * 1000) if track.duration is not None else None,
                 track_nr=track.track_number or 1,  # Singles have no track number
@@ -74,7 +74,7 @@ class BandcampProvider(Provider):
         if raw_upc:
             upc = raw_upc.group(1)
         return Album(
-            title=album.title,
+            title=self._(album.title),
             artist=artist_name,
             release_date=f"{album.release_date:%Y-%m-%d}",
             tracks=tracks,

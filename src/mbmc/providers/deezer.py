@@ -23,8 +23,8 @@ class DeezerProvider(Provider):
         sleep(0.5)  # Avoid hitting rate limits
         tracks = [
             Track(
-                title=track.title,
-                artist=[(track.artist.name, normalize_url(track.artist.link))],
+                title=self._(track.title),
+                artist=[(self._(track.artist.name), normalize_url(track.artist.link))],
                 duration=track.duration * 1000,
                 track_nr=track.track_position,
                 disk_nr=track.disk_number,
@@ -33,8 +33,8 @@ class DeezerProvider(Provider):
             for track in album.get_tracks()
         ]
         return Album(
-            title=album.title,
-            artist=[(album.artist.name, normalize_url(album.artist.link))],
+            title=self._(album.title),
+            artist=[(self._(album.artist.name), normalize_url(album.artist.link))],
             release_date=f"{album.release_date:%Y-%m-%d}",
             tracks=tracks,
             url=normalize_url(album.link),

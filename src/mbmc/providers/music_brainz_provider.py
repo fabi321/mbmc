@@ -30,7 +30,7 @@ class MusicBrainzProvider(Provider):
         for release in releases:
             tracks = [
                 Track(
-                    title=track["recording"]["title"],
+                    title=self._(track["recording"]["title"]),
                     artist=track["recording"]["artist-credit-phrase"],
                     duration=int(track.get("length", 0)),
                     track_nr=int(track["position"]),
@@ -45,7 +45,7 @@ class MusicBrainzProvider(Provider):
                 extra_info = f"({release['medium-list'][0].get('format', 'Unknown Format')})"
             finalized.append(
                 Album(
-                    title=release["title"],
+                    title=self._(release["title"]),
                     url=f"https://musicbrainz.org/release/{release['id']}",
                     artist=release["artist-credit-phrase"],
                     release_date=release.get("date", "Unknown"),

@@ -31,17 +31,17 @@ class TidalProvider(Provider):
     def item_to_artist(item: tidalapi.Album | tidalapi.Track) -> ArtistFormat:
         if item.artists:
             return [
-                (artist.name, f"https://tidal.com/artist/{artist.id}")
+                (Provider._(artist.name), f"https://tidal.com/artist/{artist.id}")
                 for artist in item.artists
             ]
-        return item.artist.name
+        return Provider._(item.artist.name)
 
     @cached
     def get_album(self, album_id: str) -> Album:
         album = self.session.album(album_id)
         tracks = [
             Track(
-                title=track.name,
+                title=self._(track.name),
                 artist=TidalProvider.item_to_artist(track),
                 duration=int(track.duration * 1000),
                 track_nr=track.track_num,
@@ -50,7 +50,7 @@ class TidalProvider(Provider):
             for track in album.tracks()
         ]
         return Album(
-            title=album.name,
+            title=self._(album.name),
             artist=TidalProvider.item_to_artist(album),
             release_date=f"{album.release_date:%Y-%m-%d}",
             tracks=tracks,
