@@ -61,7 +61,10 @@ class YouTubeMusicProvider(Provider):
         )
 
     def fetch(self, url: str, ignore: list[str]) -> list[Album]:
-        artist: types.Artist = self.client.get_artist(url.split("/")[-1])
+        try:
+            artist: types.Artist = self.client.get_artist(url.split("/")[-1])
+        except KeyError:
+            return []
         finalized: list[Album] = []
         albums = self.get_releases_for_artist(artist, "albums")
         singles = self.get_releases_for_artist(artist, "singles")
