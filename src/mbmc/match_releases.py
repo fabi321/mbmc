@@ -235,7 +235,7 @@ def album_to_album_artist(
 
 def album_to_release_date(album: Album) -> tuple[str, str, int]:
     score = 0
-    if "-01" in album.release_date:
+    if "-01-01" in album.release_date:
         score = 1
     elif "-" in album.release_date:
         score = 2
