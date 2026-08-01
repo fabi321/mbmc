@@ -67,7 +67,6 @@ def get_cookies() -> RequestsCookieJar:
     )
     result = requests.get(new_url, allow_redirects=True)
     result.raise_for_status()
-    print(dict(result.cookies.items()))
     return result.cookies
 
 
