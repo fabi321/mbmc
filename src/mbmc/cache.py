@@ -25,7 +25,7 @@ def init_db():
         unique(name, input_value) on conflict replace
     ) strict;
     create unique index if not exists idx_name_input on cache (name, input_value);
-    delete from cache where last_access < unixepoch() - 604800;
+    delete from cache where last_access < unixepoch() - 30758400;
     """)
     local.cache.commit()
 
