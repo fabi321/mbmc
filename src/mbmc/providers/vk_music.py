@@ -5,7 +5,6 @@ from typing import TypedDict, List, Literal
 from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
 
 import requests
-from bs4 import BeautifulSoup, Tag
 from requests.cookies import RequestsCookieJar
 
 from mbmc.providers._mb_link_types import (
@@ -14,6 +13,8 @@ from mbmc.providers._mb_link_types import (
 )
 from mbmc.providers.provider import Provider, Album, ArtistFormat, Track
 from mbmc.cache import cached
+
+USER_AGENT: str = "Mozilla/5.0 (X11; Linux x86_64; rv:153.0) Gecko/20100101 Firefox/153.0"
 
 
 class Playlist(TypedDict):
@@ -66,36 +67,51 @@ def get_cookies() -> RequestsCookieJar:
     )
     result = requests.get(new_url, allow_redirects=True)
     result.raise_for_status()
+    print(dict(result.cookies.items()))
     return result.cookies
 
 
 @cache
-def get_oauth() -> tuple[str, str]:
-    """
-    request = requests.get("https://vk.com")
+def get_oauth() -> tuple[str, str, str]:
+    request = requests.get("https://vk.ru", headers={"User-Agent": USER_AGENT})
     request.raise_for_status()
     match = re.search(
-        r"https://st.vk.com/dist/web/chunks/common.[0-9a-f]+.js",
+        r"https://st[-1-9a-z]*.vk.(?:ru|com)/dist/(?:projects/vk-web/entrypoints|core_spa)/core_spa(?:_vk)?.[0-9a-f]+.js",
         request.text
      )
     assert match
     common_url = match.group(0)
     request = requests.get(common_url)
     request.raise_for_status()
-    client_secret = re.search(r'[a-zA-Z]="([a-zA-Z0-9]{20})"', request.text)
+    version = re.search(r'const\s+[a-z_]+="([0-9]+.[0-9]+)"', request.text)
+    client_secret = re.search(r'const\s([a-z_]+=[^;]+clientSecret:[a-z][^;]+);.*?clientId:([a-z]+),clientSecret:([a-z]+)', request.text)
     assert client_secret
-    raise NotImplementedError()
-    """
-    return ("6287487", "QbYic1K3lEV5kTGiqlq2")
+    client_id_name = client_secret.group(2)
+    client_secret_name = client_secret.group(3)
+    variables: dict[str, str] = {}
+    for assign in re.finditer(r'([a-z_]+)=([^;,]+)[;,]', client_secret.group(1)):
+        target = assign.group(1)
+        value = assign.group(2)
+        if value.startswith('"') and value.endswith('"'):
+            value = value[1:-1]
+        elif value.isdigit():
+            pass
+        else:
+            value = variables.get(value)
+        if value is not None:
+            variables[target] = value
+    if client_id_name in variables and client_secret_name in variables:
+        return variables[client_id_name], variables[client_secret_name], version.group(1)
+    raise RuntimeError(f"Couldn't find {client_id_name} and {client_secret_name}")
 
 
 @cache
 def get_access_token() -> str:
-    client_id, client_secret = get_oauth()
+    client_id, client_secret, _ = get_oauth()
     request = requests.post(
         "https://login.vk.com/?act=get_anonym_token",
         headers={
-            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:143.0) Gecko/20100101 Firefox/143.0"
+            "User-Agent": USER_AGENT,
         },
         data={
             "client_secret": client_secret,
@@ -129,21 +145,25 @@ def vk_artist(obj: dict) -> ArtistFormat:
 
 
 def api_call(path: str, data: dict) -> dict:
-    client_id, _ = get_oauth()
+    client_id, _, version = get_oauth()
     if "access_token" not in data:
         data["access_token"] = get_access_token()
+    if "url" in data:
+        data["url"] = data["url"].replace("https://vk.com", "https://vk.ru")
     request = requests.post(
-        f"https://api.vk.com/method/{path}?v=5.276&client_id={client_id}",
+        f"https://web.api.vk.ru/method/{path}?v={version}&client_id={client_id}",
         headers={
-            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:143.0) Gecko/20100101 Firefox/143.0",
-            "Content-Type": "application/json",
+            "User-Agent": USER_AGENT,
+            "Content-Type": "application/x-www-form-urlencoded",
         },
         data=data,
         cookies=get_cookies(),
     )
     request.raise_for_status()
-    return request.json()["response"]
-
+    result = request.json()
+    with open("vk_response.json", "w") as f:
+        f.write(request.text)
+    return result["response"]
 
 @cached
 def resolve_artist(domain: str) -> str:
@@ -184,7 +204,6 @@ class VkMusicProvider(Provider):
 
     @cached
     def get_album(self, owner_id: str, playlist_id: str, access_key: str) -> Album:
-        client_id, _ = get_oauth()
         album_information = api_call(
             "audio.getPlaylistById",
             {
