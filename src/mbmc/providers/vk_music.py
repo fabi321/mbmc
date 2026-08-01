@@ -160,10 +160,7 @@ def api_call(path: str, data: dict) -> dict:
         cookies=get_cookies(),
     )
     request.raise_for_status()
-    result = request.json()
-    with open("vk_response.json", "w") as f:
-        f.write(request.text)
-    return result["response"]
+    return request.json()["response"]
 
 @cached
 def resolve_artist(domain: str) -> str:
